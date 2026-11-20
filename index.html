@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060a14">
+<meta name="description" content="Main game gratis langsung di browser. Game Html IbnuZephyr.">
+<title>Game Html IbnuZephyr | Main Game di Browser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060a14;--panel:#0c1326;--line:#25337a;--vio:#7c5cff;--acc:#4ee2c8;--dark:#04201c;--btn:#0f1d45;--blue:#3b6bd6;--tx:#e8f0ff;--mu:#8fa0c8;--rose:#fb7185;--mono:ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;color-scheme:dark}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:Sora,system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.5;padding-bottom:84px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+[hidden]{display:none!important}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+.mono{font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em}
+
+.nav{position:sticky;top:0;z-index:50;background:rgba(6,10,20,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:10px;height:58px}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-weight:700;font-size:13px;color:var(--tx);text-decoration:none;white-space:nowrap}
+.brand i{font-style:normal;font-size:22px}
+.nl{display:flex;align-items:center;gap:14px}
+.nl a{color:var(--mu);font-family:var(--mono);font-size:11px;text-transform:uppercase;text-decoration:none}
+.nl .pilih{color:var(--tx);border:1px solid var(--line);padding:8px 12px;border-radius:8px}
+
+.hero{padding:34px 0 18px;background:radial-gradient(600px 260px at 90% -10%,rgba(124,92,255,.28),transparent)}
+.kick{color:var(--acc);font-size:11px}
+h1{font-size:clamp(30px,8vw,56px);font-weight:800;line-height:1.08;letter-spacing:-1px;margin:10px 0}
+.desk{color:var(--mu);font-size:14px;max-width:520px}
+.stats{display:flex;gap:26px;margin-top:20px}
+.stat b{display:block;font-size:24px;font-weight:800;line-height:1.1}
+.stat small{color:var(--mu);font-size:11px}
+
+.bar{display:grid;gap:10px;margin:18px 0 20px}
+.cari{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--vio);border-radius:12px;padding:0 14px;box-shadow:0 0 0 1px rgba(59,107,214,.35)}
+.cari input{flex:1;background:none;border:0;padding:13px 0;font-size:14px;outline:none}
+.cari input::placeholder{color:var(--mu)}
+.bar select{appearance:none;background:var(--acc);color:var(--dark);border:0;border-radius:10px;padding:13px 14px;font-family:var(--mono);font-weight:700;font-size:12px;text-transform:uppercase}
+.sh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+h2{font-size:18px;font-weight:800}
+.jml{color:var(--mu);font-size:11px}
+
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:720px){.grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}}
+.kosong{grid-column:1/-1;color:var(--mu);padding:24px 0;font-size:14px}
+.card{display:flex;flex-direction:column;gap:8px}
+.cover{position:relative;display:grid;place-items:center;width:100%;aspect-ratio:3/4;border:1px solid var(--line);border-radius:12px;background:linear-gradient(160deg,var(--a),var(--b));overflow:hidden}
+.cover .em{font-size:clamp(54px,18vw,84px)}
+.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tag{position:absolute;left:8px;bottom:8px;font-style:normal;font-family:var(--mono);font-size:9px;font-weight:700;color:var(--acc);background:rgba(6,10,20,.82);border:1px solid rgba(78,226,200,.5);padding:3px 7px;border-radius:5px;text-transform:uppercase}
+.row{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+.row h3{font-size:14px;line-height:1.3}
+.heart{background:none;border:0;font-size:18px;line-height:1;color:var(--mu);padding:2px}
+.heart[aria-pressed=true]{color:var(--rose)}
+.play{width:100%;background:var(--btn);border:1px solid var(--blue);border-radius:9px;padding:10px 6px;font-family:var(--mono);font-size:11px;font-weight:700;text-transform:uppercase}
+.play:hover{background:#16286a}
+
+.bn{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;justify-content:space-around;background:rgba(12,19,38,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px))}
+.bn button{background:none;border:0;display:grid;justify-items:center;gap:2px;color:var(--mu);font-family:var(--mono);font-size:9.5px;text-transform:uppercase;min-width:60px}
+.bn button span{font-size:19px;line-height:1}
+.bn button[aria-current=true]{color:var(--acc)}
+
+#pemain{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column}
+.ph{display:flex;align-items:center;gap:10px;padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top,0px));background:var(--panel);border-bottom:1px solid var(--line)}
+.ph b{flex:1;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph button{background:var(--btn);border:1px solid var(--blue);border-radius:8px;padding:7px 12px;font-family:var(--mono);font-size:11px;text-transform:uppercase}
+#pbody{flex:1;min-height:0;display:flex}
+#pbody iframe{flex:1;width:100%;height:100%;border:0;background:#fff}
+dialog{margin:auto;border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--tx);width:min(92vw,420px);padding:20px}
+dialog::backdrop{background:rgba(2,6,14,.8)}
+dialog h2{margin-bottom:10px}dialog p{color:var(--mu);font-size:14px;margin-bottom:10px}
+dialog button{margin-top:6px;background:var(--acc);color:var(--dark);border:0;border-radius:10px;padding:10px 18px;font-weight:700}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body id="top">
+<nav class="nav"><div class="wrap">
+  <a class="brand" href="#top"><i>🎮</i>GAME HTML</a>
+  <div class="nl"><a href="#game">Permainan</a><a class="pilih" href="#game">Pilih permainan ↗</a></div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <p class="kick mono">Browser • Game Html Ibnu • Diperbarui 20 Nov 2026</p>
+  <h1>Main game di browser 🎮</h1>
+  <p class="desk">Game gratis yang langsung jalan di HP maupun komputer. Tanpa install, tinggal ketuk dan main.</p>
+  <div class="stats">
+    <div class="stat"><b id="s-game">0</b><small class="mono">game</small></div>
+    <div class="stat"><b id="s-fav">0</b><small class="mono">favorit</small></div>
+    <div class="stat"><b id="s-main">0</b><small class="mono">main hari ini</small></div>
+  </div>
+</div></header>
+
+<main class="wrap" id="game">
+  <div class="bar">
+    <label class="cari"><span aria-hidden="true">🔍</span><input id="cari" type="search" placeholder="Cari game..." aria-label="Cari game"></label>
+    <select id="kat" aria-label="Kategori"></select>
+  </div>
+  <div class="sh"><h2 id="jud">Semua game</h2><span class="jml mono" id="jml"></span></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<nav class="bn" aria-label="Menu bawah">
+  <button data-tab="semua" aria-current="true"><span>☰</span>Menu</button>
+  <button data-tab="bagian"><span>▤</span>Bagian-bagian</button>
+  <button data-tab="fav"><span>♡</span>Favorit</button>
+  <button data-tab="riwayat"><span>▦</span>Koleksi</button>
+  <button data-tab="privasi"><span>🔒</span>Privasi</button>
+</nav>
+
+<section id="pemain" hidden>
+  <div class="ph"><button id="kembali">← Kembali</button><b id="pjudul"></b><button id="penuh" aria-label="Layar penuh">⛶</button></div>
+  <div id="pbody"></div>
+</section>
+
+<dialog id="dpriv">
+  <h2>Privasi</h2>
+  <p>Favorit dan riwayat main hanya disimpan di browser kamu sendiri, tidak dikirim ke mana pun.</p>
+  <p>Game dimuat dari file HTML di situs ini.</p>
+  <button id="tpriv">Mengerti</button>
+</dialog>
+
+<script>
+/* ============================================================
+   CARA MENAMBAH GAME BARU
+   1) Simpan file game (.html) kamu di folder  games/
+   2) Tambahkan satu baris di daftar GAMES di bawah ini:
+      {judul:'Nama Game', emoji:'🧩', kategori:'Puzzle',
+       warna:['#f59e0b','#b45309'], file:'games/nama-file.html'}
+   Opsional: gambar:'games/cover.jpg' untuk cover bergambar.
+   Saat tombol MAINKAN diketuk, file itu dibuka di dalam situs ini.
+   ============================================================ */
+const GAMES=[
+  {judul:'Snake',emoji:'🐍',kategori:'Arcade',warna:['#10b981','#064e3b'],file:'games/snake.html'},
+  {judul:'Tic Tac Toe',emoji:'❌',kategori:'Strategi',warna:['#4ee2c8','#134e4a'],file:'games/tictactoe.html'},
+  {judul:'Memory Kartu',emoji:'🃏',kategori:'Puzzle',warna:['#38bdf8','#1e3a8a'],file:'games/memory.html'},
+  {judul:'Tebak Angka',emoji:'🔢',kategori:'Puzzle',warna:['#a78bfa','#4c1d95'],file:'games/tebak.html'},
+  {judul:'Game Balap',emoji:'🏎',kategori:'Arcade',warna:['#a78bfa','#afffff'],file:'games/gamemobilbalap.html'},
+  {judul:'Horor Setan',emoji:'👻',kategori:'Strategi',warna:['#5a0808','#e81212'],file:'games/horor.html'},
+  {judul:'Buru Maling!',emoji:'👮',kategori:'Strategi',warna:['#78bfa','#514be5'],file:'games/sniper.html'},
+  {judul:'Subway sarp',emoji:'🚧',kategori:'Arcade',warna:['#8bf4fa','#c1aec8d6'],file:'games/subway.html'},
+  {judul: 'Menembak musuh',emoji:'🏹',kategori:'Strategi',warna:['#d877cf','#5c30e5'],file:'games/tembak.html'},
+  {judul:'4in one',emoji:'🔺',kategori:'Puzzle',warna:['#2a243e','#c32b82'],file:'games/4in1.html'}
+
+];  
+
+const $=id=>document.getElementById(id);
+const muat=k=>{try{return JSON.parse(localStorage.getItem(k))||[]}catch(e){return[]}};
+const simpan=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const fav=new Set(muat('favs'));
+let riwayat=muat('recent');
+const hari=new Date().toDateString();
+let main=muat('plays');if(main[0]!==hari)main=[hari,0];
+let kat='Semua',q='',tab='semua';
+
+const kartu=i=>{const g=GAMES[i],f=fav.has(g.judul);
+  return `<article class="card">
+  <button class="cover" data-play="${i}" style="--a:${g.warna[0]};--b:${g.warna[1]}" aria-label="Mainkan ${g.judul}">${g.gambar?`<img src="${g.gambar}" alt="" loading="lazy">`:`<span class="em">${g.emoji}</span>`}<i class="tag">Permainan browser</i></button>
+  <div class="row"><h3>${g.judul}</h3><button class="heart" data-fav="${g.judul}" aria-pressed="${f}" aria-label="Favorit ${g.judul}">${f?'♥':'♡'}</button></div>
+  <button class="play" data-play="${i}">▶ Mainkan di browser</button></article>`};
+
+function render(){
+  const sel=$('kat');
+  if(!sel.options.length)['Semua permainan',...new Set(GAMES.map(g=>g.kategori))].forEach(k=>sel.add(new Option(k,k=='Semua permainan'?'Semua':k)));
+  const idx=GAMES.map((g,i)=>i).filter(i=>{const g=GAMES[i];
+    return(kat=='Semua'||g.kategori==kat)&&(tab!='fav'||fav.has(g.judul))&&(tab!='riwayat'||riwayat.includes(g.judul))&&(g.judul+g.kategori).toLowerCase().includes(q)});
+  if(tab=='riwayat')idx.sort((a,b)=>riwayat.indexOf(GAMES[a].judul)-riwayat.indexOf(GAMES[b].judul));
+  $('jud').textContent={semua:'Semua game',fav:'Favoritmu',riwayat:'Terakhir dimainkan'}[tab]||'Semua game';
+  $('jml').textContent=idx.length+' game';
+  $('grid').innerHTML=idx.map(kartu).join('')||`<p class="kosong">${tab=='fav'?'Belum ada favorit. Ketuk ♡ pada game untuk menyimpannya.':tab=='riwayat'?'Belum ada game yang dimainkan.':'Tidak ada game yang cocok. Coba kata lain atau pilih Semua permainan.'}</p>`;
+  $('s-game').textContent=GAMES.length;$('s-fav').textContent=fav.size;$('s-main').textContent=main[1];
+  document.querySelectorAll('.bn [data-tab]').forEach(b=>b.setAttribute('aria-current',b.dataset.tab==tab));
+}
+
+function buka(i){
+  const g=GAMES[i];
+  $('pjudul').textContent=g.emoji+' '+g.judul;
+  $('pbody').innerHTML=`<iframe src="${g.file}" title="${g.judul}" allow="fullscreen;gamepad;autoplay" allowfullscreen></iframe>`;
+  $('pemain').hidden=false;document.body.style.overflow='hidden';
+  main[1]++;simpan('plays',main);
+  riwayat=[g.judul,...riwayat.filter(x=>x!=g.judul)].slice(0,12);simpan('recent',riwayat);
+  location.hash='main';
+}
+function tutupUI(){$('pemain').hidden=true;$('pbody').innerHTML='';document.body.style.overflow='';render()}
+const tutup=()=>location.hash=='#main'?history.back():tutupUI();
+addEventListener('hashchange',()=>{if(location.hash!='#main'&&!$('pemain').hidden)tutupUI()});
+if(location.hash=='#main')history.replaceState(null,'',location.pathname);
+
+document.addEventListener('click',e=>{
+  const p=e.target.closest('[data-play]');if(p)return buka(+p.dataset.play);
+  const f=e.target.closest('[data-fav]');
+  if(f){const k=f.dataset.fav;fav.has(k)?fav.delete(k):fav.add(k);simpan('favs',[...fav]);render();return}
+  const t=e.target.closest('[data-tab]');
+  if(t){const d=t.dataset.tab;
+    if(d=='privasi')return $('dpriv').showModal();
+    if(d=='bagian'){$('kat').focus();return $('game').scrollIntoView()}
+    tab=d;render();$('game').scrollIntoView()}
+});
+$('cari').oninput=e=>{q=e.target.value.trim().toLowerCase();render()};
+$('kat').onchange=e=>{kat=e.target.value;render()};
+$('kembali').onclick=tutup;
+$('penuh').onclick=()=>{const el=$('pbody');(el.requestFullscreen||el.webkitRequestFullscreen||(()=>{})).call(el)};
+$('tpriv').onclick=()=>$('dpriv').close();
+render();
+</script>
+</body>
+</html>
