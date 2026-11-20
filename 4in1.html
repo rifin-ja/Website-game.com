@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ultimate 4-in-1 Game Simulator Suite</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&family=Creepster&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #090a0f;
+            color: #e2e8f0;
+            user-select: none;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        .font-creepster { font-family: 'Creepster', cursive; }
+        
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
+
+        /* Neon Glow Effects */
+        .neon-box-blue { box-shadow: 0 0 15px rgba(59, 130, 246, 0.4), inset 0 0 15px rgba(59, 130, 246, 0.2); }
+        .neon-box-red { box-shadow: 0 0 15px rgba(239, 68, 68, 0.4), inset 0 0 15px rgba(239, 68, 68, 0.2); }
+        .neon-box-amber { box-shadow: 0 0 15px rgba(245, 158, 11, 0.4), inset 0 0 15px rgba(245, 158, 11, 0.2); }
+        .neon-box-emerald { box-shadow: 0 0 15px rgba(16, 185, 129, 0.4), inset 0 0 15px rgba(16, 185, 129, 0.2); }
+        
+        .neon-text-blue { text-shadow: 0 0 8px rgba(59, 130, 246, 0.8); }
+        .neon-text-red { text-shadow: 0 0 8px rgba(239, 68, 68, 0.8); }
+
+        /* Game Card Hover Effect */
+        .game-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .game-card:hover {
+            transform: translateY(-6px) scale(1.02);
+        }
+
+        /* Scope overlay cursor */
+        .scope-cursor {
+            cursor: crosshair;
+        }
+
+        /* Animation utilities */
+        @keyframes pulse-fast {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .animate-pulse-fast { animation: pulse-fast 0.8s infinite; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden select-none">
+
+    <!-- Top Navigation Header -->
+    <header class="h-16 border-b border-slate-800 bg-slate-900/80 backdrop-blur px-4 md:px-8 flex items-center justify-between z-40 relative">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('hub')">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <i class="fa-solid font-orbitron text-xl text-white">4X</i>
+            </div>
+            <div>
+                <h1 class="font-orbitron font-bold text-lg md:text-xl tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
+                    SIMULATOR HUB
+                </h1>
+                <p class="text-xs text-slate-400 font-mono tracking-widest hidden sm:block">NEXT-GEN MINI ENGINE</p>
+            </div>
+        </div>
+
+        <!-- Global Hub Controls & Audio Indicator -->
+        <div class="flex items-center space-x-3 md:space-x-4">
+            <button id="soundToggleBtn" onclick="toggleAudio()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-2 text-sm">
+                <i id="soundIcon" class="fa-solid fa-volume-high text-emerald-400"></i>
+                <span id="soundStatus" class="font-mono text-xs hidden sm:inline">AUDIO ON</span>
+            </button>
+            <button onclick="switchView('hub')" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition shadow-lg shadow-indigo-600/30 flex items-center gap-2">
+                <i class="fa-solid fa-house"></i>
+                <span class="hidden sm:inline">MAIN HUB</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main View Container -->
+    <main class="flex-1 relative overflow-hidden flex flex-col justify-center items-center p-2 sm:p-4">
+
+        <!-- ==================== MAIN GAME SELECTION HUB ==================== -->
+        <div id="viewHub" class="w-full max-w-6xl mx-auto flex flex-col items-center justify-center p-4 py-6 overflow-y-auto max-h-[calc(100vh-4rem)]">
+            <div class="text-center mb-8">
+                <span class="text-xs font-mono tracking-widest text-indigo-400 uppercase bg-indigo-950/60 border border-indigo-800/50 px-3 py-1 rounded-full">Enhanced Mini Game Engine</span>
+                <h2 class="font-orbitron text-3xl md:text-5xl font-extrabold mt-3 bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
+                    SELECT A SIMULATOR
+                </h2>
+                <p class="text-slate-400 text-sm md:text-base mt-2 max-w-xl mx-auto">
+                    Experience dynamic 60 FPS physics, customized graphics, synthesized procedural sound effects, and real-time simulator gameplay.
+                </p>
+            </div>
+
+            <!-- Game Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+
+                <!-- 1. Horror Game Card -->
+                <div class="game-card bg-slate-900/90 border border-red-900/40 rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden neon-box-red group">
+                    <div class="absolute -right-6 -bottom-6 text-red-950/20 group-hover:text-red-900/20 transition-all duration-500">
+                        <i class="fa-solid fa-ghost text-9xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="p-3 rounded-xl bg-red-950/60 border border-red-800/50 text-red-400 text-2xl">
+                                <i class="fa-solid fa-biohazard"></i>
+                            </span>
+                            <span class="text-xs font-mono bg-slate-950 text-red-400 border border-red-900 px-2 py-1 rounded">3D SURVIVAL</span>
+                        </div>
+                        <h3 class="font-creepster text-3xl text-red-500 tracking-wide mb-1">Horror Escape</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                            First-person dark maze. Manage battery, find keys, listen to eerie footsteps, and escape the creeping creature!
+                        </p>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-mono text-slate-400 mb-3 bg-slate-950/60 p-2 rounded border border-slate-800">
+                            <span>BEST SCORE:</span>
+                            <span id="score-horror" class="text-red-400 font-bold">0 ESCAPES</span>
+                        </div>
+                        <button onclick="launchGame('horror')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-700 to-rose-600 hover:from-red-600 hover:to-rose-500 text-white font-bold tracking-wider text-sm shadow-lg shadow-red-900/40 transition">
+                            LAUNCH SIMULATOR
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. Sniper Tactical Card -->
+                <div class="game-card bg-slate-900/90 border border-amber-900/40 rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden neon-box-amber group">
+                    <div class="absolute -right-6 -bottom-6 text-amber-950/20 group-hover:text-amber-900/20 transition-all duration-500">
+                        <i class="fa-solid fa-crosshairs text-9xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="p-3 rounded-xl bg-amber-950/60 border border-amber-800/50 text-amber-400 text-2xl">
+                                <i class="fa-solid fa-crosshairs"></i>
+                            </span>
+                            <span class="text-xs font-mono bg-slate-950 text-amber-400 border border-amber-900 px-2 py-1 rounded">PHYSICS SCOPE</span>
+                        </div>
+                        <h3 class="font-orbitron font-bold text-xl text-amber-400 tracking-wide mb-1">Sniper Tactical</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                            Realistic sniper scope simulator. Account for wind speed, scope sway, distance gravity drop, and moving targets.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-mono text-slate-400 mb-3 bg-slate-950/60 p-2 rounded border border-slate-800">
+                            <span>HIGH SCORE:</span>
+                            <span id="score-sniper" class="text-amber-400 font-bold">0 PTS</span>
+                        </div>
+                        <button onclick="launchGame('sniper')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-bold tracking-wider text-sm shadow-lg shadow-amber-900/40 transition">
+                            LAUNCH SIMULATOR
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. Subway Runner Card -->
+                <div class="game-card bg-slate-900/90 border border-emerald-900/40 rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden neon-box-emerald group">
+                    <div class="absolute -right-6 -bottom-6 text-emerald-950/20 group-hover:text-emerald-900/20 transition-all duration-500">
+                        <i class="fa-solid fa-train text-9xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="p-3 rounded-xl bg-emerald-950/60 border border-emerald-800/50 text-emerald-400 text-2xl">
+                                <i class="fa-solid fa-bolt"></i>
+                            </span>
+                            <span class="text-xs font-mono bg-slate-950 text-emerald-400 border border-emerald-900 px-2 py-1 rounded">3D RUNNER</span>
+                        </div>
+                        <h3 class="font-orbitron font-bold text-xl text-emerald-400 tracking-wide mb-1">Subway Runner</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                            3-Lane high speed runner! Jump, slide, dodge incoming trains, collect coins, and activate power-up magnet shields!
+                        </p>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-mono text-slate-400 mb-3 bg-slate-950/60 p-2 rounded border border-slate-800">
+                            <span>MAX DISTANCE:</span>
+                            <span id="score-subway" class="text-emerald-400 font-bold">0 M</span>
+                        </div>
+                        <button onclick="launchGame('subway')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold tracking-wider text-sm shadow-lg shadow-emerald-900/40 transition">
+                            LAUNCH SIMULATOR
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4. Action Shooter Card -->
+                <div class="game-card bg-slate-900/90 border border-blue-900/40 rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden neon-box-blue group">
+                    <div class="absolute -right-6 -bottom-6 text-blue-950/20 group-hover:text-blue-900/20 transition-all duration-500">
+                        <i class="fa-solid fa-gun text-9xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="p-3 rounded-xl bg-blue-950/60 border border-blue-800/50 text-blue-400 text-2xl">
+                                <i class="fa-solid fa-burst"></i>
+                            </span>
+                            <span class="text-xs font-mono bg-slate-950 text-blue-400 border border-blue-900 px-2 py-1 rounded">TOP-DOWN ARENA</span>
+                        </div>
+                        <h3 class="font-orbitron font-bold text-xl text-blue-400 tracking-wide mb-1">Action Shooter</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                            Fast-paced arena survival. Switch between Pistol, Shotgun, and Rifle. Battle dynamic waves, collect drops, survive!
+                        </p>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-mono text-slate-400 mb-3 bg-slate-950/60 p-2 rounded border border-slate-800">
+                            <span>MAX KILLS:</span>
+                            <span id="score-shooter" class="text-blue-400 font-bold">0 KILLS</span>
+                        </div>
+                        <button onclick="launchGame('shooter')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold tracking-wider text-sm shadow-lg shadow-blue-900/40 transition">
+                            LAUNCH SIMULATOR
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==================== GAME DISPLAY CONTAINER ==================== -->
+        <div id="gameScreen" class="w-full h-full max-w-5xl flex-1 hidden flex flex-col items-center justify-center relative">
+            
+            <!-- Game HUD & Top Controls bar -->
+            <div class="w-full bg-slate-900/90 border border-slate-800 rounded-t-2xl px-4 py-2 flex items-center justify-between z-30">
+                <div class="flex items-center space-x-3">
+                    <span id="activeGameBadge" class="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-indigo-950 text-indigo-400 border border-indigo-700">GAME</span>
+                    <h3 id="activeGameTitle" class="font-orbitron font-bold text-sm md:text-base text-white">SIMULATOR</h3>
+                </div>
+
+                <div id="gameSpecificStats" class="flex items-center space-x-4 text-xs font-mono">
+                    <!-- Dynamic HUD elements appended via JS -->
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <button onclick="restartActiveGame()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition flex items-center gap-1" title="Restart Game">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                    <button onclick="toggleInstructions()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="Instructions">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Canvas Viewport Wrapper -->
+            <div class="w-full flex-1 relative bg-black rounded-b-2xl overflow-hidden border-x border-b border-slate-800 flex items-center justify-center">
+                <canvas id="mainCanvas" class="w-full h-full object-contain"></canvas>
+
+                <!-- On-Screen Controls for Mobile/Touch -->
+                <div id="touchControls" class="absolute bottom-4 left-4 right-4 flex justify-between items-center pointer-events-none md:hidden z-20">
+                    <div id="dpad" class="grid grid-cols-3 gap-1 w-32 h-32 pointer-events-auto opacity-75">
+                        <div></div>
+                        <button id="btnUp" class="bg-slate-800/80 active:bg-indigo-600 text-white rounded flex items-center justify-center"><i class="fa-solid fa-chevron-up"></i></button>
+                        <div></div>
+                        <button id="btnLeft" class="bg-slate-800/80 active:bg-indigo-600 text-white rounded flex items-center justify-center"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="bg-slate-900/50 rounded"></div>
+                        <button id="btnRight" class="bg-slate-800/80 active:bg-indigo-600 text-white rounded flex items-center justify-center"><i class="fa-solid fa-chevron-right"></i></button>
+                        <div></div>
+                        <button id="btnDown" class="bg-slate-800/80 active:bg-indigo-600 text-white rounded flex items-center justify-center"><i class="fa-solid fa-chevron-down"></i></button>
+                        <div></div>
+                    </div>
+                    <div id="actionBtns" class="flex flex-col gap-2 pointer-events-auto opacity-80">
+                        <button id="btnActionA" class="w-14 h-14 rounded-full bg-indigo-600 active:bg-indigo-400 text-white font-bold text-lg flex items-center justify-center shadow-lg">A</button>
+                        <button id="btnActionB" class="w-12 h-12 rounded-full bg-rose-600 active:bg-rose-400 text-white font-bold text-sm flex items-center justify-center shadow-lg">B</button>
+                    </div>
+                </div>
+
+                <!-- Overlay Messages (Game Over, Victory, Paused) -->
+                <div id="gameOverlay" class="absolute inset-0 bg-slate-950/85 backdrop-blur-md hidden flex flex-col items-center justify-center p-6 text-center z-30">
+                    <h2 id="overlayTitle" class="font-orbitron text-3xl md:text-5xl font-extrabold mb-2 text-white">GAME OVER</h2>
+                    <p id="overlayMessage" class="text-slate-300 text-sm md:text-base max-w-md mb-6">You got caught in the dark!</p>
+                    <div class="flex gap-4">
+                        <button onclick="restartActiveGame()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm tracking-wide transition shadow-lg shadow-indigo-600/40">
+                            PLAY AGAIN
+                        </button>
+                        <button onclick="switchView('hub')" class="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm tracking-wide transition">
+                            BACK TO MENU
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Instructions Modal Overlay -->
+                <div id="instructionsModal" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md hidden flex flex-col items-center justify-center p-6 z-40 text-left">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-lg w-full">
+                        <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-2">
+                            <h3 id="instModalTitle" class="font-orbitron font-bold text-lg text-indigo-400">HOW TO PLAY</h3>
+                            <button onclick="toggleInstructions()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                        </div>
+                        <div id="instModalBody" class="text-sm text-slate-300 space-y-3 leading-relaxed font-sans">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <button onclick="toggleInstructions()" class="mt-6 w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm transition">
+                            GOT IT!
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- JavaScript Game Suite Logic -->
+    <script>
+        /* ==========================================================================
+           1. GLOBAL AUDIO SYNTHESIZER ENGINE (Web Audio API)
+           ========================================================================== */
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioCtx();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playGunshot(type = 'pistol') {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                
+                // Noise buffer for blast
+                const bufferSize = this.ctx.sampleRate * (type === 'shotgun' ? 0.3 : 0.15);
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const output = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+
+                const whiteNoise = this.ctx.createBufferSource();
+                whiteNoise.buffer = buffer;
+
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = type === 'sniper' ? 'bandpass' : 'lowpass';
+                filter.frequency.setValueAtTime(type === 'shotgun' ? 800 : 1800, now);
+                filter.frequency.exponentialRampToValueAtTime(100, now + (type === 'shotgun' ? 0.3 : 0.15));
+
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(type === 'sniper' ? 0.8 : 0.5, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + (type === 'shotgun' ? 0.3 : 0.15));
+
+                whiteNoise.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                whiteNoise.start(now);
+            }
+
+            playCoin() {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(987.77, now); // B5
+                osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
+
+            playJumpScare() {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(120, now);
+                osc.frequency.linearRampToValueAtTime(600, now + 0.3);
+                osc.frequency.linearRampToValueAtTime(80, now + 0.6);
+
+                gain.gain.setValueAtTime(0.7, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.7);
+            }
+
+            playFootstep() {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(80, now);
+                osc.frequency.exponentialRampToValueAtTime(30, now + 0.08);
+
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            }
+
+            playClick() {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(200, now + 0.04);
+
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.04);
+            }
+        }
+
+        const audio = new SoundEngine();
+
+        function toggleAudio() {
+            audio.enabled = !audio.enabled;
+            const icon = document.getElementById('soundIcon');
+            const status = document.getElementById('soundStatus');
+            if (audio.enabled) {
+                icon.className = 'fa-solid fa-volume-high text-emerald-400';
+                status.innerText = 'AUDIO ON';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-500';
+                status.innerText = 'AUDIO OFF';
+            }
+        }
+
+        /* ==========================================================================
+           2. HIGH SCORE TRACKER MANAGEMENT
+           ========================================================================== */
+        const HighScores = {
+            horror: parseInt(localStorage.getItem('hs_horror') || '0'),
+            sniper: parseInt(localStorage.getItem('hs_sniper') || '0'),
+            subway: parseInt(localStorage.getItem('hs_subway') || '0'),
+            shooter: parseInt(localStorage.getItem('hs_shooter') || '0'),
+
+            save(game, score) {
+                if (score > this[game]) {
+                    this[game] = score;
+                    localStorage.setItem(`hs_${game}`, score.toString());
+                    this.updateUI();
+                }
+            },
+
+            updateUI() {
+                document.getElementById('score-horror').innerText = `${this.horror} ESCAPES`;
+                document.getElementById('score-sniper').innerText = `${this.sniper} PTS`;
+                document.getElementById('score-subway').innerText = `${this.subway} M`;
+                document.getElementById('score-shooter').innerText = `${this.shooter} KILLS`;
+            }
+        };
+        HighScores.updateUI();
+
+        /* ==========================================================================
+           3. ROUTING & CORE CANVAS SETUP
+           ========================================================================== */
+        let activeGameName = null;
+        let currentGameInstance = null;
+        let animationFrameId = null;
+
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            if (currentGameInstance && currentGameInstance.resize) {
+                currentGameInstance.resize();
+            }
+        });
+
+        function switchView(view) {
+            document.getElementById('viewHub').classList.add('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('gameOverlay').classList.add('hidden');
+
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+
+            if (view === 'hub') {
+                document.getElementById('viewHub').classList.remove('hidden');
+                activeGameName = null;
+                currentGameInstance = null;
+            } else if (view === 'game') {
+                document.getElementById('gameScreen').classList.remove('hidden');
+                resizeCanvas();
+            }
+        }
+
+        function launchGame(gameKey) {
+            switchView('game');
+            activeGameName = gameKey;
+            const badge = document.getElementById('activeGameBadge');
+            const title = document.getElementById('activeGameTitle');
+
+            if (gameKey === 'horror') {
+                badge.className = 'px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-red-950 text-red-400 border border-red-800';
+                title.innerText = 'HORROR ESCAPE 3D';
+                currentGameInstance = new HorrorGame(canvas, ctx);
+            } else if (gameKey === 'sniper') {
+                badge.className = 'px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-amber-950 text-amber-400 border border-amber-800';
+                title.innerText = 'SNIPER TACTICAL SIMULATOR';
+                currentGameInstance = new SniperGame(canvas, ctx);
+            } else if (gameKey === 'subway') {
+                badge.className = 'px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800';
+                title.innerText = 'SUBWAY ENDLESS RUNNER';
+                currentGameInstance = new SubwayGame(canvas, ctx);
+            } else if (gameKey === 'shooter') {
+                badge.className = 'px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-blue-950 text-blue-400 border border-blue-800';
+                title.innerText = 'ACTION SHOOTER ARENA';
+                currentGameInstance = new ShooterGame(canvas, ctx);
+            }
+
+            currentGameInstance.init();
+            startLoop();
+        }
+
+        function restartActiveGame() {
+            document.getElementById('gameOverlay').classList.add('hidden');
+            if (activeGameName) {
+                launchGame(activeGameName);
+            }
+        }
+
+        function showGameOver(titleText, msgText) {
+            document.getElementById('overlayTitle').innerText = titleText;
+            document.getElementById('overlayMessage').innerText = msgText;
+            document.getElementById('gameOverlay').classList.remove('hidden');
+        }
+
+        function startLoop() {
+            let lastTime = performance.now();
+            function gameLoop(now) {
+                const dt = Math.min((now - lastTime) / 1000, 0.1);
+                lastTime = now;
+
+                if (currentGameInstance) {
+                    currentGameInstance.update(dt);
+                    currentGameInstance.draw();
+                }
+                animationFrameId = requestAnimationFrame(gameLoop);
+            }
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function toggleInstructions() {
+            const modal = document.getElementById('instructionsModal');
+            if (modal.classList.contains('hidden')) {
+                const info = currentGameInstance ? currentGameInstance.getInstructions() : { title: 'General', text: 'Select a game.' };
+                document.getElementById('instModalTitle').innerText = info.title;
+                document.getElementById('instModalBody').innerHTML = info.text;
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        /* Input Controls Dispatcher for Touch & Keyboard */
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+            if (currentGameInstance && currentGameInstance.onKeyDown) currentGameInstance.onKeyDown(e);
+        });
+        window.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+            if (currentGameInstance && currentGameInstance.onKeyUp) currentGameInstance.onKeyUp(e);
+        });
+
+        // Touch Listeners
+        const bindBtn = (id, keyName) => {
+            const btn = document.getElementById(id);
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; if (currentGameInstance && currentGameInstance.onKeyDown) currentGameInstance.onKeyDown({ code: keyName }); });
+            btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; if (currentGameInstance && currentGameInstance.onKeyUp) currentGameInstance.onKeyUp({ code: keyName }); });
+        };
+        bindBtn('btnUp', 'ArrowUp');
+        bindBtn('btnDown', 'ArrowDown');
+        bindBtn('btnLeft', 'ArrowLeft');
+        bindBtn('btnRight', 'ArrowRight');
+        bindBtn('btnActionA', 'Space');
+        bindBtn('btnActionB', 'KeyR');
+
+
+        /* ==========================================================================
+           4. GAME 1: HORROR ESCAPE 3D SIMULATOR (horor.html Enhanced)
+           ========================================================================== */
+        class HorrorGame {
+            constructor(canvas, ctx) {
+                this.canvas = canvas;
+                this.ctx = ctx;
+                
+                // Raycasting Map Grid (1 = Wall, 0 = Empty, 2 = Key, 3 = Exit)
+                this.map = [
+                    [1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,1,0,0,0,0,0,2,1],
+                    [1,0,1,0,1,0,1,1,1,1,0,1],
+                    [1,0,1,0,0,0,0,0,0,1,0,1],
+                    [1,0,1,1,1,1,1,1,0,1,0,1],
+                    [1,0,0,0,2,0,0,1,0,0,0,1],
+                    [1,1,1,1,0,1,0,1,1,1,0,1],
+                    [1,2,0,1,0,1,0,0,0,1,0,1],
+                    [1,0,0,1,0,1,1,1,0,1,0,1],
+                    [1,0,1,1,0,0,0,1,0,0,3,1],
+                    [1,0,0,0,0,1,0,0,0,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1]
+                ];
+                this.mapSize = 12;
+
+                this.px = 1.5;
+                this.py = 1.5;
+                this.pAngle = 0;
+                this.fov = Math.PI / 3;
+
+                this.battery = 100;
+                this.keysCollected = 0;
+                this.totalKeys = 3;
+
+                // Monster state
+                this.mx = 10.5;
+                this.my = 1.5;
+                this.mSpeed = 1.2;
+
+                this.stepTimer = 0;
+                this.gameOver = false;
+                this.escaped = false;
+            }
+
+            init() {
+                this.battery = 100;
+                this.keysCollected = 0;
+                this.gameOver = false;
+                this.escaped = false;
+                this.px = 1.5;
+                this.py = 1.5;
+                this.updateHUD();
+            }
+
+            getInstructions() {
+                return {
+                    title: "HORROR SURVIVAL INSTRUCTIONS",
+                    text: "<p><b>Goal:</b> Find all 3 hidden Golden Keys inside the dark maze and escape through the RED Door (Exit).</p>" +
+                          "<p><b>Controls:</b><br>- <b>W/S or UP/DOWN:</b> Move Forward / Backward<br>- <b>A/D or LEFT/RIGHT:</b> Turn Left / Right</p>" +
+                          "<p><b>Tips:</b> Flashlight drains over time. Beware of the creature roaming in the dark. Footstep sounds announce its proximity!</p>"
+                };
+            }
+
+            updateHUD() {
+                document.getElementById('gameSpecificStats').innerHTML = `
+                    <div class="flex items-center gap-2"><i class="fa-solid fa-battery-half text-amber-400"></i> BATTERY: <span class="text-amber-300 font-bold">${Math.ceil(this.battery)}%</span></div>
+                    <div class="flex items-center gap-2"><i class="fa-solid fa-key text-yellow-400"></i> KEYS: <span class="text-yellow-300 font-bold">${this.keysCollected}/${this.totalKeys}</span></div>
+                `;
+            }
+
+            onKeyDown(e) {}
+            onKeyUp(e) {}
+
+            update(dt) {
+                if (this.gameOver || this.escaped) return;
+
+                // Drain Flashlight Battery
+                this.battery = Math.max(0, this.battery - dt * 2.5);
+
+                // Movement
+                const moveSpeed = 2.0 * dt;
+                const rotSpeed = 2.5 * dt;
+
+                let dx = 0, dy = 0;
+                if (keys['ArrowUp'] || keys['KeyW']) {
+                    dx += Math.cos(this.pAngle) * moveSpeed;
+                    dy += Math.sin(this.pAngle) * moveSpeed;
+                }
+                if (keys['ArrowDown'] || keys['KeyS']) {
+                    dx -= Math.cos(this.pAngle) * moveSpeed;
+                    dy -= Math.sin(this.pAngle) * moveSpeed;
+                }
+                if (keys['ArrowLeft'] || keys['KeyA']) {
+                    this.pAngle -= rotSpeed;
+                }
+                if (keys['ArrowRight'] || keys['KeyD']) {
+                    this.pAngle += rotSpeed;
+                }
+
+                // Simple collision detection with walls
+                let newX = this.px + dx;
+                let newY = this.py + dy;
+                if (this.map[Math.floor(this.py)][Math.floor(newX)] === 0 || this.map[Math.floor(this.py)][Math.floor(newX)] >= 2) {
+                    this.px = newX;
+                }
+                if (this.map[Math.floor(newY)][Math.floor(this.px)] === 0 || this.map[Math.floor(newY)][Math.floor(this.px)] >= 2) {
+                    this.py = newY;
+                }
+
+                // Footstep sound tick
+                if (dx !== 0 || dy !== 0) {
+                    this.stepTimer += dt;
+                    if (this.stepTimer > 0.45) {
+                        audio.playFootstep();
+                        this.stepTimer = 0;
+                    }
+                }
+
+                // Key Pickup & Exit Check
+                const curTileX = Math.floor(this.px);
+                const curTileY = Math.floor(this.py);
+                if (this.map[curTileY][curTileX] === 2) {
+                    this.map[curTileY][curTileX] = 0;
+                    this.keysCollected++;
+                    audio.playCoin();
+                    this.updateHUD();
+                } else if (this.map[curTileY][curTileX] === 3) {
+                    if (this.keysCollected >= this.totalKeys) {
+                        this.escaped = true;
+                        HighScores.save('horror', 1);
+                        showGameOver("YOU ESCAPED!", "You survived the dark labyrinth with all keys!");
+                    }
+                }
+
+                // Monster AI (Moves slowly toward player)
+                const mdx = this.px - this.mx;
+                const mdy = this.py - this.my;
+                const distToPlayer = Math.hypot(mdx, mdy);
+                if (distToPlayer > 0.3) {
+                    this.mx += (mdx / distToPlayer) * this.mSpeed * dt;
+                    this.my += (mdy / distToPlayer) * this.mSpeed * dt;
+                } else {
+                    // Monster catches player!
+                    this.gameOver = true;
+                    audio.playJumpScare();
+                    showGameOver("JUMP SCARE!", "The dark entity caught you in the corridors!");
+                }
+
+                this.updateHUD();
+            }
+
+            draw() {
+                const w = this.canvas.width;
+                const h = this.canvas.height;
+
+                // Clear background (Ceiling & Floor)
+                this.ctx.fillStyle = '#050508';
+                this.ctx.fillRect(0, 0, w, h / 2);
+                this.ctx.fillStyle = '#0f0f15';
+                this.ctx.fillRect(0, h / 2, w, h / 2);
+
+                // Raycasting pseudo-3D rendering
+                const numRays = Math.floor(w / 4);
+                const rayStep = this.fov / numRays;
+
+                for (let i = 0; i < numRays; i++) {
+                    const rayAngle = (this.pAngle - this.fov / 2) + i * rayStep;
+                    let distance = 0;
+                    let hitWall = false;
+                    let hitType = 0;
+
+                    const cos = Math.cos(rayAngle);
+                    const sin = Math.sin(rayAngle);
+
+                    while (!hitWall && distance < 12) {
+                        distance += 0.05;
+                        const checkX = Math.floor(this.px + cos * distance);
+                        const checkY = Math.floor(this.py + sin * distance);
+
+                        if (checkX < 0 || checkX >= this.mapSize || checkY < 0 || checkY >= this.mapSize) {
+                            hitWall = true;
+                            distance = 12;
+                        } else if (this.map[checkY][checkX] > 0) {
+                            hitWall = true;
+                            hitType = this.map[checkY][checkX];
+                        }
+                    }
+
+                    // Fix fish-eye lens effect
+                    const correctedDist = distance * Math.cos(rayAngle - this.pAngle);
+                    const lineHeight = Math.min(h, (h / correctedDist));
+                    const drawStart = (h - lineHeight) / 2;
+
+                    // Light falloff based on flashlight battery
+                    const lightIntensity = Math.max(0.05, (1 - correctedDist / 8) * (this.battery / 100));
+
+                    // Wall Colors
+                    if (hitType === 1) { // Normal Wall
+                        const colorVal = Math.floor(180 * lightIntensity);
+                        this.ctx.fillStyle = `rgb(${colorVal}, ${colorVal * 0.9}, ${colorVal * 1.1})`;
+                    } else if (hitType === 2) { // Key Tile Wall
+                        const colorVal = Math.floor(220 * lightIntensity);
+                        this.ctx.fillStyle = `rgb(${colorVal}, ${colorVal * 0.8}, 0)`;
+                    } else if (hitType === 3) { // Exit Gate
+                        const colorVal = Math.floor(250 * lightIntensity);
+                        this.ctx.fillStyle = `rgb(${colorVal}, 20, 20)`;
+                    }
+
+                    this.ctx.fillRect(i * 4, drawStart, 4, lineHeight);
+                }
+
+                // Render Monster Indicator Flicker in HUD / Raycast Overlay
+                const mdist = Math.hypot(this.px - this.mx, this.py - this.my);
+                if (mdist < 4.0) {
+                    const alertAlpha = (1 - mdist / 4.0) * (Math.random() * 0.4 + 0.2);
+                    this.ctx.fillStyle = `rgba(220, 38, 38, ${alertAlpha})`;
+                    this.ctx.fillRect(0, 0, w, h);
+                }
+            }
+        }
+
+
+        /* ==========================================================================
+           5. GAME 2: SNIPER TACTICAL SIMULATOR (sniper.html Enhanced)
+           ========================================================================== */
+        class SniperGame {
+            constructor(canvas, ctx) {
+                this.canvas = canvas;
+                this.ctx = ctx;
+
+                this.score = 0;
+                this.ammo = 5;
+                this.maxAmmo = 5;
+
+                // Scope & Physics Params
+                this.mouseX = canvas.width / 2;
+                this.mouseY = canvas.height / 2;
+                this.windX = (Math.random() * 4 - 2); // Wind effect
+                this.swayTime = 0;
+
+                // Targets
+                this.targets = [];
+                this.gameOver = false;
+                this.reloadTimer = 0;
+
+                this.handleMouseMove = (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    this.mouseX = e.clientX - rect.left;
+                    this.mouseY = e.clientY - rect.top;
+                };
+
+                this.handleMouseClick = () => {
+                    this.shoot();
+                };
+            }
+
+            init() {
+                this.score = 0;
+                this.ammo = this.maxAmmo;
+                this.gameOver = false;
+                this.spawnTargets();
+                this.updateHUD();
+
+                this.canvas.addEventListener('mousemove', this.handleMouseMove);
+                this.canvas.addEventListener('click', this.handleMouseClick);
+            }
+
+            getInstructions() {
+                return {
+                    title: "SNIPER TACTICAL SIMULATOR",
+                    text: "<p><b>Goal:</b> Eliminate moving hostiles with precise scope shots.</p>" +
+                          "<p><b>Controls:</b><br>- <b>Mouse Move:</b> Aim Scope<br>- <b>Left Click / Space:</b> Fire Bullet<br>- <b>R Key:</b> Reload Magazine</p>" +
+                          "<p><b>Physics:</b> Account for crosshair sway and wind resistance shown at top HUD!</p>"
+                };
+            }
+
+            spawnTargets() {
+                this.targets = [];
+                for (let i = 0; i < 4; i++) {
+                    this.targets.push({
+                        x: Math.random() * (this.canvas.width - 200) + 100,
+                        y: Math.random() * (this.canvas.height / 2) + 100,
+                        vx: (Math.random() * 2 - 1) * 80,
+                        radius: 18,
+                        type: Math.random() > 0.5 ? 'moving' : 'patrol'
+                    });
+                }
+                this.windX = (Math.random() * 6 - 3);
+            }
+
+            updateHUD() {
+                document.getElementById('gameSpecificStats').innerHTML = `
+                    <div class="flex items-center gap-2"><i class="fa-solid fa-wind text-sky-400"></i> WIND: <span class="text-sky-300 font-bold">${this.windX.toFixed(1)} M/S</span></div>
+                    <div class="flex items-center gap-2"><i class="fa-solid fa-bullseye text-amber-400"></i> SCORE: <span class="text-amber-300 font-bold">${this.score}</span></div>
+                    <div class="flex items-center gap-2"><i class="fa-solid fa-layer-group text-rose-400"></i> AMMO: <span class="text-rose-300 font-bold">${this.ammo}/${this.maxAmmo}</span></div>
+                `;
+            }
+
+            onKeyDown(e) {
+                if (e.code === 'KeyR') this.reload();
+                if (e.code === 'Space') this.shoot();
+            }
+
+            shoot() {
+                if (this.gameOver || this.reloadTimer > 0) return;
+                if (this.ammo <= 0) {
+                    audio.playClick();
+                    return;
+                }
+
+                this.ammo--;
+                audio.playGunshot('sniper');
+                this.updateHUD();
+
+                // Scope Sway offset calculation
+                const swayX = Math.sin(this.swayTime * 2) * 8;
+                const swayY = Math.cos(this.swayTime * 1.5) * 8;
+                const finalImpactX = this.mouseX + swayX + this.windX * 5;
+                const finalImpactY = this.mouseY + swayY;
+
+                // Check target hits
+                let hitCount = 0;
+                this.targets.forEach((t, idx) => {
+                    const dist = Math.hypot(t.x - finalImpactX, t.y - finalImpactY);
+                    if (dist < t.radius) {
+                        hitCount++;
+                        this.score += 100;
+                        this.targets.splice(idx, 1);
+                    }
+                });
+
+                if (this.targets.length === 0) {
+                    this.spawnTargets();
+                }
+
+                if (this.ammo === 0) {
+                    setTimeout(() => {
+                        if (this.ammo === 0) {
+                            HighScores.save('sniper', this.score);
+                            showGameOver("OUT OF AMMO", `Mission completed with ${this.score} Tactical Points!`);
+                        }
+                    }, 1000);
+                }
+            }
+
+            reload() {
+                this.reloadTimer = 1.5;
+                audio.playClick();
+                setTimeout(() => {
+                    this.ammo = this.maxAmmo;
+                    this.reloadTimer = 0;
+                    this.updateHUD();
+                }, 1200);
+            }
+
+            update(dt) {
+                if (this.gameOver) return;
+                this.swayTime += dt;
+
+                // Move targets
+                this.targets.forEach(t => {
+                    t.x += t.vx * dt;
+                    if (t.x < 100 || t.x > this.canvas.width - 100) {
+                        t.vx *= -1;
+                    }
+                });
+            }
+
+            draw() {
+                const w = this.canvas.width;
+                const h = this.canvas.height;
+
+                // Render Battlefield Environment
+                this.ctx.fillStyle = '#1e293b';
+                this.ctx.fillRect(0, 0, w, h);
+
+                // Mountains/Structures
+                this.ctx.fillStyle = '#0f172a';
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, h * 0.7);
+                this.ctx.lineTo(w * 0.3, h * 0.4);
+                this.ctx.lineTo(w * 0.6, h * 0.65);
+                this.ctx.lineTo(w, h * 0.35);
+                this.ctx.lineTo(w, h);
+                this.ctx.lineTo(0, h);
+                this.ctx.fill();
+
+                // Render Enemy Hostile Targets
+                this.targets.forEach(t => {
+                    this.ctx.fillStyle = '#ef4444';
+                    this.ctx.beginPath();
+                    this.ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // Target head dot
+                    this.ctx.fillStyle = '#fca5a5';
+                    this.ctx.beginPath();
+                    this.ctx.arc(t.x, t.y - 4, t.radius * 0.4, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+
+                // Tactical Scope Lens Overlay
+                const swayX = Math.sin(this.swayTime * 2) * 8;
+                const swayY = Math.cos(this.swayTime * 1.5) * 8;
+                const scopeX = this.mouseX + swayX;
+                const scopeY = this.mouseY + swayY;
+                const scopeR = Math.min(w, h) * 0.32;
+
+                // Darken outside scope
+                this.ctx.save();
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+                this.ctx.beginPath();
+                this.ctx.rect(0, 0, w, h);
+                this.ctx.arc(scopeX, scopeY, scopeR, 0, Math.PI * 2, true);
+                this.ctx.fill();
+
+                // Scope Ring
+                this.ctx.strokeStyle = '#22c55e';
+                this.ctx.lineWidth = 4;
+                this.ctx.beginPath();
+                this.ctx.arc(scopeX, scopeY, scopeR, 0, Math.PI * 2);
+                this.ctx.stroke();
+
+                // Crosshairs
+                this.ctx.strokeStyle = '#22c55e';
+                this.ctx.lineWidth = 1.5;
+                this.ctx.beginPath();
+                this.ctx.moveTo(scopeX - scopeR, scopeY);
+                this.ctx.lineTo(scopeX + scopeR, scopeY);
+                this.ctx.moveTo(scopeX, scopeY - scopeR);
+                this.ctx.lineTo(scopeX, scopeY + scopeR);
+                this.ctx.stroke();
+
+                // Mil-dot hashmarks
+                for (let i = -3; i <= 3; i++) {
+                    if (i === 0) continue;
+                    this.ctx.beginPath();
+                    this.ctx.arc(scopeX + i * 25, scopeY, 2, 0, Math.PI * 2);
+                    this.ctx.arc(scopeX, scopeY + i * 25, 2, 0, Math.PI * 2);
+                    this.ctx.fillStyle = '#22c55e';
+                    this.ctx.fill();
+                }
+
+                this.ctx.restore();
+            }
+        }
+
+
+        /* ==========================================================================
+           6. GAME 3: SUBWAY ENDLESS RUNNER (subway.html Enhanced)
+           ========================================================================== */
+        class SubwayGame {
+            constructor(canvas, ctx) {
+                this.canvas = canvas;
+                this.ctx = ctx;
+
+                this.lane = 1; // 0: Left, 1: Center, 2: Right
+                this.distance = 0;
+                this.coins = 0;
+                this.speed = 300;
+
+                this.obstacles = [];
+                this.coinItems = [];
+                this.spawnTimer = 0;
+                this.gameOver = false;
+
+                this.playerYOffset = 0;
+                this.jumpVy = 0;
+                this.isJumping = false;
+            }
+
+            init() {
+                this.lane = 1;
+                this.distance = 0;
+                this.coins = 0;
+                this.speed = 300;
+                this.obstacles = [];
+                this.coinItems = [];
+                this.gameOver = false;
+                this.updateHUD();
+            }
+
+            getInstructions() {
+                return {
+                    title: "SUBWAY RUNNER INSTRUCTIONS",
+                    text: "<p><b>Goal:</b> Sprint down the tracks, dodge incoming barriers/trains, and grab coins.</p>" +
+                          "<p><b>Controls:</b><br>- <b>A/D or LEFT/RIGHT:</b> Switch Lanes<br>- <b>W or UP / Space:</b> Jump Over Barriers</p>" +
+                          "<p><b>Score:</b> Distance meters increase rapidly with speed!</p>"
+                };
+            }
+
+            updateHUD() {
+                document.getElementById('gameSpecificStats').innerHTML = `
+                    <div class="flex items-center gap-2"><i class="fa-solid fa-coins text-yellow-400"></i> COINS: <span class="text-yellow-300 font-bold">${this.coins}</span></div>
+                    <div class="flex items-center gap-2"><i class="fa-solid fa-person-running text-emerald-400"></i> DISTANCE: <span class="text-emerald-300 font-bold">${Math.floor(this.distance)} M</span></div>
+                `;
+            }
+
+            onKeyDown(e) {
+                if (this.gameOver) return;
+                if ((e.code === 'ArrowLeft' || e.code === 'KeyA') && this.lane > 0) {
+                    this.lane--;
+                }
+                if ((e.code === 'ArrowRight' || e.code === 'KeyD') && this.lane < 2) {
+                    this.lane++;
+                }
+                if ((e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') && !this.isJumping) {
+                    this.isJumping = true;
+                    this.jumpVy = -450;
+                }
+            }
+
+            update(dt) {
+                if (this.gameOver) return;
+
+                this.distance += (this.speed * dt) / 10;
+                this.speed += dt * 5; // Acceleration
+
+                // Gravity physics for jump
+                if (this.isJumping) {
+                    this.playerYOffset += this.jumpVy * dt;
+                    this.jumpVy += 1200 * dt;
+                    if (this.playerYOffset >= 0) {
+                        this.playerYOffset = 0;
+                        this.isJumping = false;
+                    }
+                }
+
+                // Obstacle & Coin Generator
+                this.spawnTimer += dt;
+                if (this.spawnTimer > 1.2) {
+                    this.spawnTimer = 0;
+                    const spawnLane = Math.floor(Math.random() * 3);
+                    this.obstacles.push({
+                        lane: spawnLane,
+                        z: 1000,
+                        type: Math.random() > 0.4 ? 'train' : 'barrier'
+                    });
+
+                    // Coin line spawn
+                    if (Math.random() > 0.3) {
+                        const coinLane = (spawnLane + 1) % 3;
+                        for (let c = 0; c < 3; c++) {
+                            this.coinItems.push({ lane: coinLane, z: 1000 + c * 150 });
+                        }
+                    }
+                }
+
+                // Advance Obstacles
+                for (let i = this.obstacles.length - 1; i >= 0; i--) {
+                    let obs = this.obstacles[i];
+                    obs.z -= this.speed * dt;
+
+                    // Collision check
+                    if (obs.z < 80 && obs.z > -40 && obs.lane === this.lane) {
+                        if (obs.type === 'train' || (obs.type === 'barrier' && this.playerYOffset > -50)) {
+                            this.gameOver = true;
+                            audio.playJumpScare();
+                            HighScores.save('subway', Math.floor(this.distance));
+                            showGameOver("TRAIN CRASH!", `You crashed after running ${Math.floor(this.distance)} Meters!`);
+                        }
+                    }
+
+                    if (obs.z < -100) this.obstacles.splice(i, 1);
+                }
+
+                // Advance Coins
+                for (let i = this.coinItems.length - 1; i >= 0; i--) {
+                    let coin = this.coinItems[i];
+                    coin.z -= this.speed * dt;
+
+                    if (coin.z < 80 && coin.z > -40 && coin.lane === this.lane && this.playerYOffset > -80) {
+                        this.coins += 10;
+                        audio.playCoin();
+                        this.coinItems.splice(i, 1);
+                    } else if (coin.z < -100) {
+                        this.coinItems.splice(i, 1);
+                    }
+                }
+
+                this.updateHUD();
+            }
+
+            draw() {
+                const w = this.canvas.width;
+                const h = this.canvas.height;
+
+                // Track Perspective Projection Math
+                this.ctx.fillStyle = '#020617';
+                this.ctx.fillRect(0, 0, w, h);
+
+                const horizonY = h * 0.35;
+                const laneWidthsNear = w * 0.25;
+                const laneWidthsFar = w * 0.05;
+
+                // Render 3 Track Lanes
+                const getLaneX = (laneIdx, z) => {
+                    const depth = z / 1000;
+                    const currentWidth = laneWidthsFar + (laneWidthsNear - laneWidthsFar) * (1 - depth);
+                    const centerOffset = (laneIdx - 1) * currentWidth;
+                    return w / 2 + centerOffset;
+                };
+
+                // Track Background Ground
+                this.ctx.fillStyle = '#1e293b';
+                this.ctx.beginPath();
+                this.ctx.moveTo(w / 2 - laneWidthsFar * 1.5, horizonY);
+                this.ctx.lineTo(w / 2 + laneWidthsFar * 1.5, horizonY);
+                this.ctx.lineTo(w / 2 + laneWidthsNear * 1.5, h);
+                this.ctx.lineTo(w / 2 - laneWidthsNear * 1.5, h);
+                this.ctx.fill();
+
+                // Draw Rails
+                this.ctx.strokeStyle = '#64748b';
+                this.ctx.lineWidth = 3;
+                [-0.5, 0.5, 1.5, -1.5].forEach(l => {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(getLaneX(l, 1000), horizonY);
+                    this.ctx.lineTo(getLaneX(l, 0), h);
+                    this.ctx.stroke();
+                });
+
+                // Render Obstacles
+                this.obstacles.forEach(obs => {
+                    const x = getLaneX(obs.lane, obs.z);
+                    const scale = (1000 - obs.z) / 1000;
+                    const size = 60 * scale;
+                    const y = horizonY + (h - horizonY) * scale - size;
+
+                    if (obs.type === 'train') {
+                        this.ctx.fillStyle = '#dc2626';
+                        this.ctx.fillRect(x - size / 2, y, size, size * 1.2);
+                        this.ctx.fillStyle = '#fef08a';
+                        this.ctx.fillRect(x - size / 3, y + 5, size / 1.5, size / 3);
+                    } else {
+                        this.ctx.fillStyle = '#f59e0b';
+                        this.ctx.fillRect(x - size / 2, y + size * 0.5, size, size * 0.5);
+                    }
+                });
+
+                // Render Coins
+                this.coinItems.forEach(coin => {
+                    const x = getLaneX(coin.lane, coin.z);
+                    const scale = (1000 - coin.z) / 1000;
+                    const size = 20 * scale;
+                    const y = horizonY + (h - horizonY) * scale - size - 20;
+
+                    this.ctx.fillStyle = '#eab308';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, Math.max(2, size), 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+
+                // Render Player
+                const playerX = getLaneX(this.lane, 0);
+                const playerY = h - 90 + this.playerYOffset;
+
+                this.ctx.fillStyle = '#10b981';
+                this.ctx.beginPath();
+                this.ctx.arc(playerX, playerY, 24, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // Runner visor
+                this.ctx.fillStyle = '#38bdf8';
+                this.ctx.fillRect(playerX - 12, playerY - 8, 24, 8);
+            }
+        }
+
+
+        /* ==========================================================================
+           7. GAME 4: ACTION SHOOTER ARENA (tembak.html Enhanced)
+           ========================================================================== */
+        class ShooterGame {
+            constructor(canvas, ctx) {
+                this.canvas = canvas;
+                this.ctx = ctx;
+
+                this.player = { x: canvas.width / 2, y: canvas.height / 2, hp: 100, speed: 220 };
+                this.bullets = [];
+                this.enemies = [];
+                this.kills = 0;
+                this.weapon = 'rifle'; // pistol, shotgun, rifle
+
+                this.spawnTimer = 0;
+                this.gameOver = false;
+                this.mouseX = 0;
+                this.mouseY = 0;
+
+                this.handleMouseMove = (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    this.mouseX = e.clientX - rect.left;
+                    this.mouseY = e.clientY - rect.top;
+                };
+
+                this.handleMouseDown = () => {
+                    this.fireWeapon();
+                };
+            }
+
+            init() {
+                this.player = { x: this.canvas.width / 2, y: this.canvas.height / 2, hp: 100, speed: 220 };
+                this.bullets = [];
+                this.enemies = [];
+                this.kills = 0;
+                this.gameOver = false;
+                this.updateHUD();
+
+                this.canvas.addEventListener('mousemove', this.handleMouseMove);
+                this.canvas.addEventListener('mousedown', this.handleMouseDown);
+            }
+
+            getInstructions() {
+                return {
+                    title: "ACTION SHOOTER ARENA INSTRUCTIONS",
+                    text: "<p><b>Goal:</b> Survive infinite wave attacks of hostile alien entities.</p>" +
+                          "<p><b>Controls:</b><br>- <b>WASD / ARROWS:</b> Top-down Directional Movement<br>- <b>Mouse Click / Space:</b> Shoot Weapon<br>- <b>1, 2, 3 Keys:</b> Swap Weapon (Pistol / Rifle / Shotgun)</p>" +
+                          "<p><b>Weapons:</b> Shotgun has wide spread, Rifle features high fire rate!</p>"
+                };
+            }
+
+            updateHUD() {
+                document.getElementById('gameSpecificStats').innerHTML = `
+                    <div class="flex items-center gap-2"><i class="fa-solid fa-heart text-red-500"></i> HP: <span class="text-red-400 font-bold">${Math.max(0, this.player.hp)}</span></div>
+                    <div class="flex items-center gap-2"><i class="fa-solid fa-gun text-blue-400"></i> WEAPON: <span class="text-blue-300 font-bold uppercase">${this.weapon}</span></div>
+                    <div class="flex items-center gap-2"><i class="fa-solid fa-skull text-purple-400"></i> KILLS: <span class="text-purple-300 font-bold">${this.kills}</span></div>
+                `;
+            }
+
+            onKeyDown(e) {
+                if (e.code === 'Digit1') this.weapon = 'pistol';
+                if (e.code === 'Digit2') this.weapon = 'rifle';
+                if (e.code === 'Digit3') this.weapon = 'shotgun';
+                if (e.code === 'Space') this.fireWeapon();
+                this.updateHUD();
+            }
+
+            fireWeapon() {
+                if (this.gameOver) return;
+
+                const angle = Math.atan2(this.mouseY - this.player.y, this.mouseX - this.player.x);
+                audio.playGunshot(this.weapon);
+
+                if (this.weapon === 'shotgun') {
+                    for (let a = -0.2; a <= 0.2; a += 0.2) {
+                        this.bullets.push({
+                            x: this.player.x, y: this.player.y,
+                            vx: Math.cos(angle + a) * 500,
+                            vy: Math.sin(angle + a) * 500
+                        });
+                    }
+                } else {
+                    this.bullets.push({
+                        x: this.player.x, y: this.player.y,
+                        vx: Math.cos(angle) * 650,
+                        vy: Math.sin(angle) * 650
+                    });
+                }
+            }
+
+            update(dt) {
+                if (this.gameOver) return;
+
+                // Player Movement
+                let dx = 0, dy = 0;
+                if (keys['KeyW'] || keys['ArrowUp']) dy -= 1;
+                if (keys['KeyS'] || keys['ArrowDown']) dy += 1;
+                if (keys['KeyA'] || keys['ArrowLeft']) dx -= 1;
+                if (keys['KeyD'] || keys['ArrowRight']) dx += 1;
+
+                if (dx !== 0 || dy !== 0) {
+                    const len = Math.hypot(dx, dy);
+                    this.player.x = Math.max(20, Math.min(this.canvas.width - 20, this.player.x + (dx / len) * this.player.speed * dt));
+                    this.player.y = Math.max(20, Math.min(this.canvas.height - 20, this.player.y + (dy / len) * this.player.speed * dt));
+                }
+
+                // Bullets update
+                for (let i = this.bullets.length - 1; i >= 0; i--) {
+                    let b = this.bullets[i];
+                    b.x += b.vx * dt;
+                    b.y += b.vy * dt;
+                    if (b.x < 0 || b.x > this.canvas.width || b.y < 0 || b.y > this.canvas.height) {
+                        this.bullets.splice(i, 1);
+                    }
+                }
+
+                // Enemies Spawner
+                this.spawnTimer += dt;
+                if (this.spawnTimer > 0.8) {
+                    this.spawnTimer = 0;
+                    const side = Math.floor(Math.random() * 4);
+                    let ex = 0, ey = 0;
+                    if (side === 0) { ex = Math.random() * this.canvas.width; ey = -20; }
+                    else if (side === 1) { ex = Math.random() * this.canvas.width; ey = this.canvas.height + 20; }
+                    else if (side === 2) { ex = -20; ey = Math.random() * this.canvas.height; }
+                    else { ex = this.canvas.width + 20; ey = Math.random() * this.canvas.height; }
+
+                    this.enemies.push({ x: ex, y: ey, hp: 2, speed: Math.random() * 60 + 80 });
+                }
+
+                // Update Enemies & Collisions
+                for (let eIdx = this.enemies.length - 1; eIdx >= 0; eIdx--) {
+                    let e = this.enemies[eIdx];
+                    const angle = Math.atan2(this.player.y - e.y, this.player.x - e.x);
+                    e.x += Math.cos(angle) * e.speed * dt;
+                    e.y += Math.sin(angle) * e.speed * dt;
+
+                    // Bullet Collision
+                    for (let bIdx = this.bullets.length - 1; bIdx >= 0; bIdx--) {
+                        let b = this.bullets[bIdx];
+                        if (Math.hypot(b.x - e.x, b.y - e.y) < 20) {
+                            e.hp--;
+                            this.bullets.splice(bIdx, 1);
+                            if (e.hp <= 0) {
+                                this.kills++;
+                                this.enemies.splice(eIdx, 1);
+                                break;
+                            }
+                        }
+                    }
+
+                    // Player Hit Collision
+                    if (Math.hypot(this.player.x - e.x, this.player.y - e.y) < 22) {
+                        this.player.hp -= dt * 35;
+                        if (this.player.hp <= 0) {
+                            this.gameOver = true;
+                            audio.playJumpScare();
+                            HighScores.save('shooter', this.kills);
+                            showGameOver("OVERRUN BY ENEMIES!", `You eliminated ${this.kills} hostiles before falling!`);
+                        }
+                    }
+                }
+
+                this.updateHUD();
+            }
+
+            draw() {
+                const w = this.canvas.width;
+                const h = this.canvas.height;
+
+                // Grid Arena Surface
+                this.ctx.fillStyle = '#090d16';
+                this.ctx.fillRect(0, 0, w, h);
+
+                this.ctx.strokeStyle = '#1e293b';
+                this.ctx.lineWidth = 1;
+                for (let x = 0; x < w; x += 40) {
+                    this.ctx.beginPath(); this.ctx.moveTo(x, 0); this.ctx.lineTo(x, h); this.ctx.stroke();
+                }
+                for (let y = 0; y < h; y += 40) {
+                    this.ctx.beginPath(); this.ctx.moveTo(0, y); this.ctx.lineTo(w, y); this.ctx.stroke();
+                }
+
+                // Draw Bullets
+                this.ctx.fillStyle = '#facc15';
+                this.bullets.forEach(b => {
+                    this.ctx.beginPath();
+                    this.ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+
+                // Draw Enemies
+                this.enemies.forEach(e => {
+                    this.ctx.fillStyle = '#a855f7';
+                    this.ctx.beginPath();
+                    this.ctx.arc(e.x, e.y, 16, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // Glow center
+                    this.ctx.fillStyle = '#e9d5ff';
+                    this.ctx.beginPath();
+                    this.ctx.arc(e.x, e.y, 6, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+
+                // Draw Player Top-Down
+                const pAngle = Math.atan2(this.mouseY - this.player.y, this.mouseX - this.player.x);
+                this.ctx.save();
+                this.ctx.translate(this.player.x, this.player.y);
+                this.ctx.rotate(pAngle);
+
+                // Body
+                this.ctx.fillStyle = '#3b82f6';
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, 18, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // Gun Barrel
+                this.ctx.fillStyle = '#94a3b8';
+                this.ctx.fillRect(10, -4, 18, 8);
+                this.ctx.restore();
+            }
+        }
+
+        // Initialize default view state
+        switchView('hub');
+    </script>
+</body>
+</html>

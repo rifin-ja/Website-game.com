@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Arena Tembak - Ultimate Action Edition</title>
+<style>
+*{margin:0;box-sizing:border-box}html,body{height:100%;overflow:hidden;background:#000;font-family:system-ui,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;color:#fff}
+canvas{display:block}
+.h{position:fixed;font-weight:800;text-shadow:0 2px 4px #000;pointer-events:none;z-index:10}
+#info{top:10px;left:12px;font-size:15px;background:rgba(0,0,0,0.5);padding:6px 12px;border-radius:8px}
+#ammo{top:10px;right:14px;font-size:18px;text-align:right;background:rgba(0,0,0,0.5);padding:6px 12px;border-radius:8px}
+#hpb{left:12px;bottom:18px;width:160px;height:14px;background:#0008;border:2px solid #fff6;border-radius:8px;overflow:hidden}#hpb i{display:block;height:100%;width:100%;background:linear-gradient(90deg, #e63946, #ff4d4d);transition:width .2s}
+#cx{left:50%;top:50%;width:24px;height:24px;margin:-12px;border:2px solid #fff;border-radius:50%;opacity:.85}
+#dmg{position:fixed;inset:0;background:radial-gradient(transparent 40%,#f00b);opacity:0;pointer-events:none;transition:opacity .25s;z-index:9}
+#jb{position:fixed;width:100px;height:100px;border:2px solid #fff6;border-radius:50%;display:none;pointer-events:none;z-index:11}
+.b{position:fixed;border:2px solid #fff8;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);border-radius:50%;color:#fff;font-weight:800;display:grid;place-items:center;font-size:12px;z-index:12;cursor:pointer;transition:transform .1s,background .2s}
+.b:active{transform:scale(0.92);background:#e6394666}
+#fire{right:18px;bottom:50px;width:86px;height:86px;font-size:14px;background:#a00c;border-color:#e63946}#rel{right:116px;bottom:34px;width:56px;height:56px}#sw{right:26px;bottom:150px;width:60px;height:60px}
+#ov{position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.75);text-align:center;padding:20px;z-index:20;backdrop-filter:blur(4px)}
+#ov div{max-width:360px;background:#181818;padding:24px;border-radius:18px;border:1px solid #444}h1{font-size:28px;margin-bottom:8px;color:#e63946}p{margin:6px 0 18px;font-size:14px;line-height:1.5;opacity:.92}
+#go{background:#e63946;color:#fff;border:0;border-radius:14px;padding:14px 32px;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 4px 15px rgba(230,57,70,0.4)}
+</style></head><body>
+<div class="h" id="info"></div><div class="h" id="ammo"></div><div class="h" id="hpb"><i id="hp"></i></div><div class="h" id="cx"></div>
+<div id="dmg"></div><div id="jb"></div>
+<button class="b" id="fire">TEMBAK</button><button class="b" id="rel">ISI</button><button class="b" id="sw">GANTI</button>
+<div id="ov"><div><h1>🔫 Arena Tembak</h1><p id="msg">Bertahan dari gelombang musuh. Tembak kepala untuk damage besar.<br><br><b>Mobile:</b> stik kiri jalan, geser kanan membidik.<br><b>Komputer:</b> WASD, mouse, klik untuk tembak, R isi ulang, 1/2 ganti senjata.</p><button id="go">Mulai</button></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=i=>document.getElementById(i),V3=THREE.Vector3;
+const R=new THREE.WebGLRenderer({antialias:true});R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);document.body.prepend(R.domElement);R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
+const S=new THREE.Scene();S.background=new THREE.Color(0x9fb4c8);S.fog=new THREE.Fog(0x9fb4c8,20,75);
+const C=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.05,100);C.rotation.order='YXZ';S.add(C);
+S.add(new THREE.HemisphereLight(0xffffff,0x556070,1));const sun=new THREE.DirectionalLight(0xffffff,.6);sun.position.set(14,26,8);S.add(sun);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-36,right:36,top:36,bottom:-36,near:1,far:80});sun.shadow.bias=-.0006;
+const M=c=>new THREE.MeshLambertMaterial({color:c}),box=(w,h,d,c,x=0,y=0,z=0)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;return m};
+addEventListener('resize',()=>{R.setSize(innerWidth,innerHeight);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix()});
+const fcv=document.createElement('canvas');fcv.width=fcv.height=256;{const x=fcv.getContext('2d');x.fillStyle='#6e7176';x.fillRect(0,0,256,256);for(let i=0;i<2500;i++){x.fillStyle=`rgba(0,0,0,${Math.random()*.15})`;x.fillRect(Math.random()*256,Math.random()*256,2,2)}x.strokeStyle='#00000055';x.strokeRect(0,0,256,256)}const FT=new THREE.CanvasTexture(fcv);FT.wrapS=FT.wrapT=THREE.RepeatWrapping;FT.repeat.set(16,16);
+const fl=new THREE.Mesh(new THREE.PlaneGeometry(64,64),new THREE.MeshLambertMaterial({map:FT}));fl.receiveShadow=true;fl.rotation.x=-Math.PI/2;S.add(fl);
+const walls=[box(64,6,1,0x8a8f98,0,3,-32),box(64,6,1,0x8a8f98,0,3,32),box(1,6,64,0x8a8f98,-32,3,0),box(1,6,64,0x8a8f98,32,3,0)];walls.forEach(w=>S.add(w));
+const crates=[];[[-8,-6,3],[7,-9,2.5],[0,0,2],[-14,8,3],[12,6,3],[-3,-18,2.5],[16,-16,3],[-18,-14,2.5],[4,12,2.2],[-22,0,2.5]].forEach(([x,z,s])=>{
+  const c=box(s,s,s,0x8b6b3d,x,s/2,z);c.add(box(s+.02,.15,s+.02,0x5a4326,0,s*.2-s/2+.3,0));c.userData.hw=s/2;S.add(c);crates.push(c)});
+const hit=(x,z,r)=>{for(const c of crates)if(Math.abs(x-c.position.x)<c.userData.hw+r&&Math.abs(z-c.position.z)<c.userData.hw+r)return 1;return Math.abs(x)>30.5||Math.abs(z)>30.5};
+
+const gun=new THREE.Group();gun.add(box(.09,.12,.6),box(.07,.18,.12,0x333333,0,-.12,.12),box(.06,.08,.25,0x444444,0,.02,-.4));
+gun.children[0].material.color.set(0x222222);gun.position.set(.22,-.22,-.45);C.add(gun);
+const mf=new THREE.Mesh(new THREE.PlaneGeometry(.25,.25),new THREE.MeshBasicMaterial({color:0xffdd55}));mf.position.set(0,.02,-.75);mf.visible=false;gun.add(mf);
+const WP=[{n:'Senapan',rate:.11,mag:30,dmg:34,pel:1,sp:.012,rl:1.5},{n:'Shotgun',rate:.75,mag:6,dmg:24,pel:7,sp:.07,rl:2.3}];
+
+const bots=[],RC=new THREE.Raycaster(),RB=new THREE.Raycaster();
+function bot(x,z){const g=new THREE.Group(),c=[0x3b5b2a,0x6b2a2a,0x2a3b6b][Math.random()*3|0];
+  const h=box(.35,.35,.35,0xe0b080,0,1.85,0);h.userData.head=1;
+  g.add(box(.7,1,.4,c,0,1.1,0),h,box(.28,.7,.3,0x222222,-.18,.35,0),box(.28,.7,.3,0x222222,.18,.35,0),box(.1,.1,.6,0x111111,.4,1.2,.3));
+  g.position.set(x,0,z);g.userData={hp:100,cd:1+Math.random()*2,hit:0};g.traverse(o=>o.userData.root=g);S.add(g);bots.push(g)}
+function wave(n){for(let i=0;i<n;i++){let x,z,k=0;do{const a=Math.random()*6.283,r=18+Math.random()*9;x=Math.cos(a)*r;z=Math.sin(a)*r;k++}
+  while((hit(x,z,.6)||Math.hypot(x-C.position.x,z-C.position.z)<14)&&k<30);bot(x,z)}}
+
+let st=0,hp,score,wv,rl=0,wi=0,cdn=0,firing=0,yaw=0,pit=0,wt=0,last=0;const am=[30,6],mv={x:0,y:0},keys={};
+const upd=()=>{$('info').textContent='Gelombang '+wv+' • Skor '+score+' • Musuh '+bots.length;$('ammo').textContent=WP[wi].n+' '+(rl>0?'isi ulang...':am[wi]+'/'+WP[wi].mag);$('hp').style.width=Math.max(0,hp)+'%'};
+function reload(){if(rl>0||am[wi]==WP[wi].mag)return;rl=WP[wi].rl;upd()}
+function mark(hd){const c=$('cx');c.style.borderColor=hd?'#ff0':'#f33';setTimeout(()=>c.style.borderColor='#fff',90)}
+
+let AC;
+function playShootSnd(w){
+  try{
+    AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended')AC.resume();
+    const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
+    o.type='sawtooth';o.frequency.setValueAtTime(w.pel>1?180:320,t);o.frequency.exponentialRampToValueAtTime(30,t+.15);
+    g.gain.setValueAtTime(.35,t);g.gain.exponentialRampToValueAtTime(.001,t+.15);
+    o.connect(g).connect(AC.destination);o.start();o.stop(t+.15);
+  }catch(e){}
+}
+function playHitSnd(){
+  try{
+    AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+    const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
+    o.type='square';o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(40,t+.1);
+    g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+.1);
+    o.connect(g).connect(AC.destination);o.start();o.stop(t+.1);
+  }catch(e){}
+}
+
+function shoot(){const w=WP[wi];if(cdn>0||rl>0||st!=1)return;if(am[wi]<=0)return reload();
+  am[wi]--;cdn=w.rate;mf.visible=true;setTimeout(()=>mf.visible=false,50);gun.position.z=-.36;pit+=.01;playShootSnd(w);
+  for(let i=0;i<w.pel;i++){RC.setFromCamera({x:(Math.random()-.5)*w.sp*2,y:(Math.random()-.5)*w.sp*2},C);
+    const h=RC.intersectObjects([...bots,...crates,...walls],true)[0];
+    if(h&&h.object.userData.root){const b=h.object.userData.root,hd=h.object.userData.head;b.userData.hp-=w.dmg*(hd?3:1);b.userData.hit=.12;mark(hd);
+      if(b.userData.hp<=0){S.remove(b);bots.splice(bots.indexOf(b),1);score+=hd?150:100}}}
+  upd()}
+function over(){st=2;document.exitPointerLock&&document.exitPointerLock();$('msg').textContent='Kamu tumbang di gelombang '+wv+' dengan skor '+score+'.';$('go').textContent='Main lagi';$('ov').style.display='grid'}
+function start(){bots.forEach(b=>S.remove(b));bots.length=0;hp=100;score=0;wv=1;am[0]=30;am[1]=6;rl=0;wi=0;C.position.set(0,1.7,24);yaw=0;pit=0;wave(4);st=1;
+  try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(e){}$('ov').style.display='none';upd()}
+
+function update(dt){
+  let f=mv.y,s=mv.x;if(keys.w)f++;if(keys.s)f--;if(keys.d)s++;if(keys.a)s--;const l=Math.hypot(f,s);if(l>1){f/=l;s/=l}
+  const sn=Math.sin(yaw),cs=Math.cos(yaw),nx=C.position.x+(-sn*f+cs*s)*6*dt,nz=C.position.z+(-cs*f-sn*s)*6*dt;
+  if(!hit(nx,C.position.z,.4))C.position.x=nx;if(!hit(C.position.x,nz,.4))C.position.z=nz;
+  C.rotation.set(pit,yaw,0);cdn-=dt;if(firing)shoot();gun.position.z+=(-.45-gun.position.z)*Math.min(1,10*dt);
+  if(rl>0){rl-=dt;if(rl<=0){am[wi]=WP[wi].mag;rl=0}upd()}
+  bots.forEach(b=>{const u=b.userData,p=b.position,dx=C.position.x-p.x,dz=C.position.z-p.z,d=Math.hypot(dx,dz);b.rotation.y=Math.atan2(dx,dz);
+    if(d>8){const nx=p.x+dx/d*2.3*dt,nz=p.z+dz/d*2.3*dt;if(!hit(nx,p.z,.5))p.x=nx;if(!hit(p.x,nz,.5))p.z=nz}
+    u.cd-=dt;if(u.cd<=0&&d<28){u.cd=1+Math.random()*1.4;RB.set(new V3(p.x,1.5,p.z),new V3(dx,0,dz).normalize());RB.far=d;
+      if(!RB.intersectObjects(crates).length&&Math.random()<.5){hp-=8;playHitSnd();$('dmg').style.opacity=1;setTimeout(()=>$('dmg').style.opacity=0,200);upd();if(hp<=0)over()}}
+    u.hit-=dt;b.children[0].material.emissive.setHex(u.hit>0?0xff2222:0)});
+  if(!bots.length&&st==1){wt+=dt;if(wt>2){wt=0;wv++;hp=Math.min(100,hp+25);am[0]=30;am[1]=6;wave(Math.min(3+wv*2,16));upd()}}
+}
+function loop(t){requestAnimationFrame(loop);const dt=Math.min((t-last)/1000,.05);last=t;if(st==1){update(dt);if(st==1&&(t|0)%10<2)upd()}R.render(S,C)}
+C.position.set(0,1.7,24);requestAnimationFrame(loop);
+$('go').onclick=start;
+
+const look=(dx,dy,k)=>{yaw-=dx*k;pit=Math.max(-1.3,Math.min(1.3,pit-dy*k))};
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();if('wasd'.includes(k)&&k.length==1)keys[k]=1;if(k=='r')reload();if(k=='1'||k=='2'){wi=+k-1;upd()}});
+addEventListener('keyup',e=>keys[e.key.toLowerCase()]=0);
+R.domElement.addEventListener('click',()=>{if(st==1&&!('ontouchstart' in window))R.domElement.requestPointerLock()});
+addEventListener('mousemove',e=>{if(document.pointerLockElement)look(e.movementX,e.movementY,.0025)});
+addEventListener('mousedown',e=>{if(e.button==0&&document.pointerLockElement)firing=1});addEventListener('mouseup',()=>firing=0);
+$('fire').onpointerdown=()=>firing=1;$('fire').onpointerup=$('fire').onpointerleave=()=>firing=0;
+$('rel').onclick=reload;$('sw').onclick=()=>{wi=1-wi;rl=0;upd()};
+const T={},jb=$('jb'),cl=v=>Math.max(-1,Math.min(1,v));
+document.addEventListener('touchstart',e=>{for(const t of e.changedTouches){if(t.target.closest('.b')||st!=1)continue;
+  const j=t.clientX<innerWidth*.45;T[t.identifier]={x:t.clientX,y:t.clientY,lx:t.clientX,ly:t.clientY,j};if(j){jb.style.cssText=`display:block;left:${t.clientX-50}px;top:${t.clientY-50}px`}}},{passive:true});
+document.addEventListener('touchmove',e=>{for(const t of e.changedTouches){const s=T[t.identifier];if(!s)continue;
+  if(s.j){mv.x=cl((t.clientX-s.x)/50);mv.y=cl(-(t.clientY-s.y)/50)}else{look(t.clientX-s.lx,t.clientY-s.ly,.005);s.lx=t.clientX;s.ly=t.clientY}}},{passive:true});
+document.addEventListener('touchend',e=>{for(const t of e.changedTouches){const s=T[t.identifier];if(s&&s.j){mv.x=mv.y=0;jb.style.display='none'}delete T[t.identifier]}});
+</script></body></html>

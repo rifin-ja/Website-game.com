@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snake</title>
+<style>
+:root{--bg:#060a14;--panel:#0c1326;--line:#25337a;--acc:#4ee2c8;--dark:#04201c;--tx:#e8f5f3;--mu:#8fa0c8;color-scheme:dark}
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;padding:16px}
+button,input{font:inherit;color:inherit;cursor:pointer}
+#app{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:440px}
+.info{color:var(--mu);font-size:14px}.info b{color:var(--tx)}
+.hint{color:var(--mu);font-size:12px;text-align:center}
+.mini{background:var(--acc);border:0;color:var(--dark);padding:10px 18px;border-radius:10px;font-weight:700}
+.inp{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 14px;width:140px;text-align:center;font-size:18px}
+.dpad{display:grid;gap:6px;justify-items:center}
+.dpad div{display:flex;gap:6px}
+.dpad button{width:54px;height:46px;background:var(--bg);border:1px solid var(--line);border-radius:10px}
+.tt{display:grid;grid-template-columns:repeat(3,84px);gap:8px}
+.tt button,.mm button{background:var(--bg);border:1px solid var(--line);border-radius:12px;font-size:34px}
+.tt button{height:84px}
+.mm{display:grid;grid-template-columns:repeat(4,66px);gap:8px}
+.mm button{height:66px;font-size:30px;color:var(--mu)}
+.mm button.on{background:var(--acc);color:var(--dark);border-color:var(--acc)}
+.mm button.ok{background:rgba(45,212,191,.18);border-color:var(--acc);color:var(--tx)}
+canvas{width:100%;max-width:300px;border-radius:12px;border:1px solid var(--line);touch-action:none}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+function snake(el){
+  el.innerHTML=`<p class="info">Skor <b class="sk">0</b> &nbsp; Rekor <b class="rk">0</b></p>
+  <canvas width="300" height="300"></canvas>
+  <div class="dpad"><button data-d="U" aria-label="Atas">▲</button><div>
+  <button data-d="L" aria-label="Kiri">◀</button><button data-d="D" aria-label="Bawah">▼</button><button data-d="R" aria-label="Kanan">▶</button></div></div>
+  <p class="hint">Pakai panah/WASD, geser layar, atau tombol di atas. Tap layar untuk main lagi.</p>`;
+  const cv=el.querySelector('canvas'),c=cv.getContext('2d'),N=15,S=20;
+  const V={U:{x:0,y:-1},D:{x:0,y:1},L:{x:-1,y:0},R:{x:1,y:0}};
+  let best=0;try{best=+localStorage.getItem('snakeBest')||0}catch(e){}
+  el.querySelector('.rk').textContent=best;
+  let s,d,nd,f,sc,t,over;
+  function pangan(){do{f={x:Math.random()*N|0,y:Math.random()*N|0}}while(s.some(p=>p.x==f.x&&p.y==f.y))}
+  function reset(){s=[{x:7,y:7},{x:6,y:7}];d=nd=V.R;sc=0;over=false;pangan();el.querySelector('.sk').textContent=0;clearInterval(t);t=setInterval(tick,120);draw()}
+  function arah(k){const n=V[k];if(n&&!(n.x==-d.x&&n.y==-d.y))nd=n}
+  function tick(){
+    d=nd;const h={x:s[0].x+d.x,y:s[0].y+d.y};
+    if(h.x<0||h.y<0||h.x>=N||h.y>=N||s.some(p=>p.x==h.x&&p.y==h.y)){over=true;clearInterval(t);
+      if(sc>best){best=sc;el.querySelector('.rk').textContent=best;try{localStorage.setItem('snakeBest',best)}catch(e){}}
+      return draw()}
+    s.unshift(h);
+    if(h.x==f.x&&h.y==f.y){sc++;el.querySelector('.sk').textContent=sc;pangan()}else s.pop();
+    draw()}
+  function draw(){
+    c.fillStyle='#0b1124';c.fillRect(0,0,300,300);
+    c.fillStyle='#ef4444';c.beginPath();c.arc(f.x*S+10,f.y*S+10,7,0,7);c.fill();
+    s.forEach((p,i)=>{c.fillStyle=i?'#10b981':'#34d399';c.fillRect(p.x*S+1,p.y*S+1,S-2,S-2)});
+    if(over){c.fillStyle='rgba(11,17,36,.8)';c.fillRect(0,0,300,300);c.fillStyle='#fff';c.textAlign='center';
+      c.font='700 24px Sora,sans-serif';c.fillText('Game selesai',150,140);c.font='15px Sora,sans-serif';c.fillText('Skor '+sc+' • tap untuk main lagi',150,170)}}
+  const kunci={ArrowUp:'U',ArrowDown:'D',ArrowLeft:'L',ArrowRight:'R',w:'U',s:'D',a:'L',d:'R'};
+  const kb=e=>{const k=kunci[e.key];if(k){e.preventDefault();over?reset():arah(k)}};
+  document.addEventListener('keydown',kb);
+  el.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>over?reset():arah(b.dataset.d));
+  cv.onclick=()=>over&&reset();
+  let tx,ty;
+  cv.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+  cv.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+    if(Math.max(Math.abs(dx),Math.abs(dy))<20)return;
+    arah(Math.abs(dx)>Math.abs(dy)?(dx>0?'R':'L'):(dy>0?'D':'U'))});
+  reset();
+  return()=>{clearInterval(t);document.removeEventListener('keydown',kb)};
+}
+
+snake(document.getElementById('app'));
+</script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Sniper Penjaga Kota - Ultimate Simulator</title>
+<style>
+*{margin:0;box-sizing:border-box}html,body{height:100%;overflow:hidden;background:#000;font-family:system-ui,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;color:#fff}
+canvas{display:block}
+.h{position:fixed;font-weight:800;text-shadow:0 2px 4px #000;pointer-events:none;z-index:10}
+#info{top:10px;left:12px;font-size:15px;background:rgba(0,0,0,0.5);padding:6px 12px;border-radius:8px;border:1px solid #ffcc0044}
+#alert{top:56px;left:0;right:0;text-align:center;font-size:17px;color:#ffd27a;opacity:0;transition:opacity .3s;text-shadow:0 0 10px #ff0000}
+#wi{left:12px;bottom:14px;font-size:13px;line-height:1.4;background:rgba(0,0,0,0.5);padding:8px;border-radius:8px}
+#sc{position:fixed;inset:0;pointer-events:none;display:none;background:radial-gradient(circle at 50% 50%,transparent 0,transparent 38vmin,rgba(0,0,0,.35) 39vmin,#000 43vmin);z-index:5}
+#sc svg{position:absolute;left:50%;top:50%;width:80vmin;height:80vmin;margin:-40vmin 0 0 -40vmin}
+#fl{position:fixed;inset:0;background:radial-gradient(circle,#fff,#ffb34766 40%,transparent 70%);opacity:0;pointer-events:none;z-index:6;transition:opacity .08s}
+#dot{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:#f33;pointer-events:none;z-index:5}
+.b{position:fixed;border:2px solid #fff8;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);border-radius:14px;color:#fff;font-weight:800;display:grid;place-items:center;font-size:12px;z-index:12;cursor:pointer;transition:transform .1s,background .2s}
+.b:active{transform:scale(0.92);background:#e6a10066}
+#fire{right:16px;bottom:44px;width:88px;height:88px;border-radius:50%;font-size:14px;background:#a00c;border-color:#ff4444}
+#rel{right:116px;bottom:30px;width:58px;height:50px}#zm{right:116px;bottom:88px;width:58px;height:50px}#br{right:16px;bottom:142px;width:88px;height:50px}
+#ws{position:fixed;top:10px;right:10px;display:flex;gap:6px;z-index:12}#ws button{position:static;width:48px;height:38px;border-radius:10px;font-size:11px;background:#0009;color:#fff;border:2px solid #fff6;font-weight:800;cursor:pointer}
+#ws button.on{background:#e6a100;color:#000;border-color:#e6a100}
+#ov{position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.78);text-align:center;padding:20px;z-index:20;backdrop-filter:blur(4px)}
+#ov div{max-width:370px;background:#151515;padding:24px;border-radius:18px;border:1px solid #444}h1{font-size:28px;margin-bottom:8px;color:#e6a100}p{margin:6px 0 18px;font-size:14px;line-height:1.5;opacity:.92}
+#go{background:#e6a100;color:#000;border:0;border-radius:14px;padding:14px 32px;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 4px 15px rgba(230,161,0,0.4)}
+</style></head><body>
+<div class="h" id="info"></div><div class="h" id="alert"></div><div class="h" id="wi"></div><div id="sc"><svg viewBox="-100 -100 200 200" stroke="#000" fill="#000"><circle r="98" fill="none" stroke-width="3"/><path d="M-98 0H-6M6 0H98M0 -98V-6M0 6V98" stroke-width=".5"/><path d="M-98 0H-14M14 0H98M0 -98V-14M0 14V98" stroke-width="1.4"/><circle cx="0" cy="0" r=".7" fill="#e22"/><g stroke="none"></g></svg></div><div id="fl"></div><div id="dot"></div>
+<div id="ws"></div><button class="b" id="fire">TEMBAK</button><button class="b" id="rel">ISI</button><button class="b" id="zm">ZOOM</button><button class="b" id="br">TAHAN NAPAS</button>
+<div id="ov"><div><h1>🎯 Sniper Penjaga Kota</h1><p id="msg">Kamu penembak jitu di atap gedung. Cari pencopet bertanda ▼ merah yang merampas tas warga, lalu tembak sebelum kabur! Jangan sampai mengenai warga biasa.<br><br><b>Mobile:</b> Geser layar untuk membidik.<br><b>Komputer:</b> Spasi/klik tembak (tahan = auto), roda mouse zoom, R isi, Z zoom, Shift tahan napas, 1-4 ganti senjata.</p><button id="go">Mulai Tugas</button></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=i=>document.getElementById(i);
+const R=new THREE.WebGLRenderer({antialias:true});R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);document.body.prepend(R.domElement);R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
+const SK=0xbcd9f0,S=new THREE.Scene();{const c=document.createElement('canvas');c.width=2;c.height=256;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'#4a90d9');g.addColorStop(.6,'#bcd9f0');g.addColorStop(1,'#fff1d6');x.fillStyle=g;x.fillRect(0,0,2,256);S.background=new THREE.CanvasTexture(c)}S.fog=new THREE.Fog(0xcfe0f0,70,230);
+const C=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,300);C.rotation.order='YXZ';C.position.set(0,12,0);
+S.add(new THREE.HemisphereLight(0xffffff,0x778877,1.05));const sun=new THREE.DirectionalLight(0xfff2d0,.7);sun.position.set(50,80,30);sun.target.position.set(0,0,-45);S.add(sun,sun.target);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-110,right:110,top:60,bottom:-60,near:10,far:200});sun.shadow.bias=-.0005;
+const M=c=>new THREE.MeshLambertMaterial({color:c}),box=(w,h,d,c,x=0,y=0,z=0)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;return m};
+addEventListener('resize',()=>{R.setSize(innerWidth,innerHeight);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix()});
+const pl=(w,d,c,x,y,z)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),M(c));m.rotation.x=-Math.PI/2;m.receiveShadow=true;m.position.set(x,y,z);S.add(m)};
+pl(500,300,0x6f7f6a,0,-.02,-100);pl(300,12,0x3a3d42,0,0,-40);pl(300,6,0xb9b6ad,0,.02,-31);pl(300,6,0xb9b6ad,0,.02,-49);
+const wc=document.createElement('canvas');wc.width=wc.height=64;const wx=wc.getContext('2d');wx.fillStyle='#8a8f98';wx.fillRect(0,0,64,64);
+for(let i=0;i<4;i++)for(let j=0;j<4;j++){wx.fillStyle=Math.random()<.35?'#ffe9a0':'#2c3e50';wx.fillRect(i*16+3,j*16+3,10,10)}
+const WT=new THREE.CanvasTexture(wc);WT.wrapS=WT.wrapT=THREE.RepeatWrapping;
+for(let x=-140;x<150;x+=16+Math.random()*6){const w=13+Math.random()*5,h=18+Math.random()*34,t=WT.clone();t.needsUpdate=true;t.repeat.set(w/6,h/6);
+  const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,12),new THREE.MeshLambertMaterial({map:t,color:[0xd8c8b0,0xb0c0d0,0xc9a8a0,0xa8c4b0][Math.random()*4|0]}));b.position.set(x,h/2,-60);b.castShadow=b.receiveShadow=true;S.add(b)}
+for(let x=-130;x<=130;x+=26){[-27.5,-52.5].forEach((z,k)=>{const g=new THREE.Group(),p=box(.15,6,.15,0x333840,0,3,0),a=box(1.4,.12,.12,0x333840,k?.7:-.7,6,0);const l=new THREE.PointLight(0xffd9a0,0,0);g.add(p,a,box(.4,.15,.3,0xffe9b0,k?1.3:-1.3,5.9,0));g.position.set(x+(k?13:0),0,z);S.add(g);const t=new THREE.Group();t.add(box(.3,2.6,.3,0x6b4a2b,0,1.3,0));const cr=new THREE.Mesh(new THREE.SphereGeometry(1.6,10,8),M(0x2f7d3a));cr.position.y=3.8;cr.castShadow=true;t.add(cr);t.position.set(x+(k?0:13),0,z);S.add(t)})}
+
+const cars=[];for(let i=0;i<6;i++){const g=new THREE.Group(),c=[0xc0392b,0x2980b9,0xf1c40f,0xecf0f1,0x27ae60][i%5];
+  g.add(box(4,1.2,1.9,c,0,.8,0),box(2.2,.9,1.7,0x9fd3e6,-.2,1.8,0),box(.6,.6,.6,0x222222,1.2,.3,.9),box(.6,.6,.6,0x222222,-1.2,.3,.9));
+  const d=i%2?1:-1;g.position.set(-80+i*30,0,d>0?-38:-42);g.userData.v=d*(7+Math.random()*4);S.add(g);cars.push(g)}
+
+const WP=[{n:'SR-1 Bolt',s:'SR-1',dmg:100,mag:5,rl:2.2,rate:1.3,zoom:[3,6],sw:.8},{n:'SR-2 Semi',s:'SR-2',dmg:60,mag:10,rl:2,rate:.45,zoom:[3,5],sw:1},
+ {n:'M-3 Marksman',s:'M-3',dmg:45,mag:20,rl:1.6,rate:.22,zoom:[2,4],sw:1.4},{n:'HX .50 Berat',s:'HX',dmg:200,mag:3,rl:3,rate:1.8,zoom:[4,8],sw:1.1}];
+const am=WP.map(w=>w.mag);let wi=0,zi=0,rl=0,cdn=0,breath=3,holding=0;
+$('ws').innerHTML=WP.map((w,i)=>`<button data-w="${i}">${w.s}</button>`).join('');
+
+const P=[],RC=new THREE.Raycaster();
+function mk(col,bag,thief){const g=new THREE.Group(),sk=[0xf1c27d,0xc68642,0x8d5524,0xe0ac69][Math.random()*4|0];
+  const h=new THREE.Mesh(new THREE.SphereGeometry(.17,10,8),M(sk));h.position.y=1.6;h.userData.head=1;
+  const l1=box(.18,.6,.2,0x222a40,-.12,.3),l2=box(.18,.6,.2,0x222a40,.12,.3),bg=box(.3,.3,.15,0x8b4513,.32,.85,.05);bg.visible=bag;
+  g.add(box(.5,.8,.3,col,0,1,0),h,l1,l2,bg);
+  const hm=new THREE.MeshBasicMaterial({visible:false}),hb=new THREE.Mesh(new THREE.BoxGeometry(.9,1.5,.8),hm);hb.position.y=.8;const hh=new THREE.Mesh(new THREE.SphereGeometry(.3,8,6),hm);hh.position.y=1.65;hh.userData.head=1;g.add(hb,hh);
+  if(thief){g.add(box(.34,.14,.34,0x111111,0,1.68,0));const m=new THREE.Mesh(new THREE.ConeGeometry(.22,.45,4),new THREE.MeshBasicMaterial({color:0xff2222}));m.rotation.x=Math.PI;m.position.y=2.4;m.userData.no=1;g.add(m)}
+  const p={g,bag:bg,l1,l2,dir:Math.random()<.5?-1:1,sp:1.2+Math.random()*.5,hp:100,thief,dead:0,ph:Math.random()*6,stop:0,s:0,t:0};
+  g.traverse(o=>{if(!o.userData.no)o.userData.p=p});S.add(g);P.push(p);return p}
+function civ(){const z=Math.random()<.5?-31:-49,p=mk([0x3498db,0x16a085,0xe67e22,0x8e44ad,0xecf0f1,0xe84393][Math.random()*6|0],Math.random()<.6);
+  p.g.position.set(-75+Math.random()*150,0,z+(Math.random()-.5)*3);return p}
+function thief(){const vs=P.filter(p=>!p.thief&&!p.dead&&p.bag.visible&&p.stop<=0&&Math.abs(p.g.position.x)<40);if(!vs.length)return;
+  const v=vs[Math.random()*vs.length|0],dir=Math.random()<.5?-1:1,t=mk(0x1a1a1a,false,true);t.v=v;t.dir=dir;
+  t.g.position.set(Math.max(-84,Math.min(84,v.g.position.x-dir*30)),0,v.g.position.z+.8);t.sp=3.6+Math.min(caught*.15,1.6);alert2('Pencopet mengincar warga bertas! Cari tanda ▼ merah')}
+
+let st=0,score,lives,caught,yaw,pit,last=0,nt;
+function alert2(t){const e=$('alert');e.textContent=t;e.style.opacity=1;clearTimeout(alert2.t);alert2.t=setTimeout(()=>e.style.opacity=0,2800)}
+const upd=()=>{$('info').textContent='Skor '+score+' • Nyawa '+'❤'.repeat(Math.max(0,lives))+' • Tertangkap '+caught;
+  const w=WP[wi];$('wi').innerHTML='<b>'+w.n+'</b><br>Peluru '+(rl>0?'isi...':am[wi]+'/'+w.mag)+' • Damage '+w.dmg+' • Zoom x'+zt+'<br>Napas '+'▮'.repeat(Math.ceil(breath))};
+let zc=1,zt=1;
+function setZoom(){zt=[1,...WP[wi].zoom][zi];$('dot').style.display=zt>1?'none':'block'}
+function camZoom(dt){zc+=(zt-zc)*Math.min(1,9*dt);C.fov=2*Math.atan(Math.tan(30*Math.PI/180)/zc)*180/Math.PI;C.updateProjectionMatrix();const sc=$('sc');sc.style.display=zc>1.35?'block':'none';sc.style.opacity=Math.min(1,(zc-1.35)*1.5)}
+function pick(i){wi=i;zi=0;rl=0;setZoom();document.querySelectorAll('#ws button').forEach((b,j)=>b.classList.toggle('on',j==i));upd()}
+
+let AC;
+function playGunSnd(w){
+  try{
+    AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended')AC.resume();
+    const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
+    o.type='sawtooth';
+    const baseF=w.dmg>150?90:160;
+    o.frequency.setValueAtTime(baseF,t);
+    o.frequency.exponentialRampToValueAtTime(30,t+.4);
+    g.gain.setValueAtTime(.6,t);
+    g.gain.exponentialRampToValueAtTime(.001,t+.4);
+    o.connect(g).connect(AC.destination);
+    o.start();o.stop(t+.4);
+  }catch(e){}
+}
+function playReloadSnd(){
+  try{
+    AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+    const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
+    o.type='triangle';o.frequency.setValueAtTime(400,t);o.frequency.setValueAtTime(600,t+.1);
+    g.gain.setValueAtTime(.2,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);
+    o.connect(g).connect(AC.destination);o.start();o.stop(t+.25);
+  }catch(e){}
+}
+
+function kill(p,hd){p.dead=1;p.t=0;if(p.thief){score+=100+(hd?50:0);caught++;nt=Math.max(2.5,nt-.4);if(p.v&&!p.v.dead){p.v.bag.visible=true;p.v.stop=0;score+=25}alert2(hd?'🎯 Headshot! Tas dikembalikan':'Pencopet tumbang, tas kembali!')}
+  else{lives--;score=Math.max(0,score-100);alert2('💥 Warga sipil terkena! Nyawa berkurang');if(lives<=0)over()}upd()}
+let buf=0,auto=0;
+function hitFx(pt,col){const m=new THREE.Mesh(new THREE.SphereGeometry(.18,6,5),new THREE.MeshBasicMaterial({color:col,transparent:true}));m.position.copy(pt);S.add(m);fxs.push({m,t:0})}
+const fxs=[];
+function shoot(){const w=WP[wi];if(st!=1)return;if(cdn>0||rl>0){buf=.18;return}if(am[wi]<=0)return reload();am[wi]--;cdn=w.rate;playGunSnd(w);pit+=.012/Math.max(1,zc*.6);yaw+=(Math.random()-.5)*.006/Math.max(1,zc*.5);const fe=$('fl');fe.style.opacity=.55;setTimeout(()=>fe.style.opacity=0,45);
+  RC.setFromCamera({x:0,y:0},C);const live=P.filter(p=>!p.dead).map(p=>p.g),h=RC.intersectObjects([...live,...cars],true).find(h=>h.object.visible&&!h.object.userData.no);
+  if(h)hitFx(h.point,h.object.userData.p?0xff3322:0xdddddd);
+  if(h&&h.object.userData.p){const p=h.object.userData.p,hd=h.object.userData.head;p.hp-=w.dmg*(hd?2.5:1);if(p.hp<=0||!p.thief)kill(p,hd)}upd()}
+function reload(){if(rl>0||am[wi]==WP[wi].mag)return;rl=WP[wi].rl;playReloadSnd();upd()}
+function escape(p){lives--;alert2('🏃 Pencopet kabur membawa tas!');S.remove(p.g);P.splice(P.indexOf(p),1);upd();if(lives<=0)over()}
+function over(){st=2;$('msg').textContent='Tugas selesai. Skor '+score+', pencopet tertangkap '+caught+'.';$('go').textContent='Main lagi';$('ov').style.display='grid'}
+function start(){P.forEach(p=>S.remove(p.g));P.length=0;for(let i=0;i<9;i++)civ();score=0;lives=3;caught=0;yaw=0;pit=-.25;nt=5;WP.forEach((w,i)=>am[i]=w.mag);breath=3;pick(0);st=1;$('ov').style.display='none';upd()}
+function update(dt,t){
+  if(buf>0){buf-=dt;if(cdn<=0&&rl<=0){buf=0;shoot()}}if(auto&&WP[wi].rate<.3)shoot();
+  for(let i=fxs.length-1;i>=0;i--){const f=fxs[i];f.t+=dt;f.m.scale.setScalar(1+f.t*8);f.m.material.opacity=1-f.t*3;if(f.t>.33){S.remove(f.m);fxs.splice(i,1)}}
+  cdn-=dt;if(rl>0){rl-=dt;if(rl<=0){am[wi]=WP[wi].mag;rl=0}upd()}
+  const hb=holding&&breath>0;breath=hb?breath-dt:Math.min(3,breath+dt*.6);const sw=WP[wi].sw*(hb?.08:1)*.0045*Math.min(zc,3);
+  C.rotation.set(pit+Math.sin(t*1.7)*sw,yaw+Math.sin(t*1.1)*sw,0);
+  nt-=dt;if(nt<=0&&!P.some(p=>p.thief&&!p.dead)){thief();nt=7+Math.random()*5}
+  cars.forEach(c=>{c.position.x+=c.userData.v*dt;if(Math.abs(c.position.x)>100)c.position.x=-c.position.x});
+  for(let i=P.length-1;i>=0;i--){const p=P[i],g=p.g;
+    if(p.dead){p.t+=dt;g.rotation.z=Math.min(p.t*4,1.5);if(p.t>2){S.remove(g);P.splice(i,1)}continue}
+    p.ph+=dt*6;
+    if(p.thief){if(p.s==0){if(p.v.dead)p.s=1;else{const dx=p.v.g.position.x-g.position.x;p.dir=Math.sign(dx)||1;g.position.x+=p.dir*3.2*dt;
+        if(Math.abs(dx)<1.2){p.s=1;p.v.bag.visible=false;p.bag.visible=true;p.v.stop=4;alert2('Tas dirampas! Tembak pencurinya sekarang!')}}}
+      else{g.position.x+=p.dir*p.sp*dt;if(Math.abs(g.position.x)>86){escape(p);continue}}}
+    else if(p.stop>0)p.stop-=dt;else{g.position.x+=p.dir*p.sp*dt;if(Math.abs(g.position.x)>86)p.dir*=-1}
+    g.rotation.y=p.dir*Math.PI/2;g.position.y=Math.abs(Math.sin(p.ph))*.05;p.l1.rotation.x=Math.sin(p.ph)*.6;p.l2.rotation.x=-Math.sin(p.ph)*.6}
+  while(P.filter(p=>!p.thief&&!p.dead).length<9)civ()}
+function loop(tm){requestAnimationFrame(loop);const dt=Math.min((tm-last)/1000,.05);last=tm;camZoom(dt);if(st==1)update(dt,tm/1000);R.render(S,C)}
+C.rotation.set(-.25,0,0);requestAnimationFrame(loop);$('go').onclick=start;
+
+let drag=null;
+addEventListener('pointerdown',e=>{if(e.target.closest('.b,#ws,#ov'))return;drag={x:e.clientX,y:e.clientY}});
+addEventListener('pointermove',e=>{if(!drag||st!=1)return;const k=.0042/Math.pow(zc,.85);yaw=Math.max(-1.1,Math.min(1.1,yaw-(e.clientX-drag.x)*k));pit=Math.max(-.5,Math.min(.25,pit-(e.clientY-drag.y)*k));drag={x:e.clientX,y:e.clientY}});
+addEventListener('pointerup',()=>drag=null);
+$('fire').onpointerdown=e=>{e.preventDefault();auto=1;shoot()};addEventListener('pointerup',()=>auto=0);$('rel').onpointerdown=e=>{e.preventDefault();reload()};$('zm').onpointerdown=e=>{e.preventDefault();zi=(zi+1)%(WP[wi].zoom.length+1);setZoom();upd()};addEventListener('wheel',e=>{if(st!=1)return;const n=WP[wi].zoom.length+1;zi=Math.max(0,Math.min(n-1,zi+(e.deltaY<0?1:-1)));setZoom();upd()},{passive:true});
+$('br').onpointerdown=()=>holding=1;$('br').onpointerup=$('br').onpointerleave=()=>holding=0;
+$('ws').onclick=e=>{const b=e.target.closest('[data-w]');if(b)pick(+b.dataset.w)};
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==' '){e.preventDefault();if(!e.repeat)shoot();auto=1}if(k=='r')reload();if(k=='z'){zi=(zi+1)%(WP[wi].zoom.length+1);setZoom();upd()}if(k=='shift')holding=1;if('1234'.includes(k)&&k)pick(+k-1)});
+addEventListener('keyup',e=>{if(e.key=='Shift')holding=0;if(e.key==' ')auto=0});
+addEventListener('mousedown',e=>{if(e.button==0&&st==1&&!e.target.closest('.b,#ws,#ov')){auto=1;shoot()}});addEventListener('mouseup',()=>auto=0);
+{const sv=$('sc').querySelector('svg');for(let i=-4;i<=4;i++)if(i){sv.insertAdjacentHTML('beforeend',`<circle cx="${i*14}" cy="0" r="1.2"/><circle cx="0" cy="${i*14}" r="1.2"/>`)}}
+setInterval(()=>st==1&&upd(),400);
+</script></body></html>

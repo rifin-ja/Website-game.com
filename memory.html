@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memory Kartu</title>
+<style>
+:root{--bg:#060a14;--panel:#0c1326;--line:#25337a;--acc:#4ee2c8;--dark:#04201c;--tx:#e8f5f3;--mu:#8fa0c8;color-scheme:dark}
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;padding:16px}
+button,input{font:inherit;color:inherit;cursor:pointer}
+#app{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:440px}
+.info{color:var(--mu);font-size:14px}.info b{color:var(--tx)}
+.hint{color:var(--mu);font-size:12px;text-align:center}
+.mini{background:var(--acc);border:0;color:var(--dark);padding:10px 18px;border-radius:10px;font-weight:700}
+.inp{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 14px;width:140px;text-align:center;font-size:18px}
+.dpad{display:grid;gap:6px;justify-items:center}
+.dpad div{display:flex;gap:6px}
+.dpad button{width:54px;height:46px;background:var(--bg);border:1px solid var(--line);border-radius:10px}
+.tt{display:grid;grid-template-columns:repeat(3,84px);gap:8px}
+.tt button,.mm button{background:var(--bg);border:1px solid var(--line);border-radius:12px;font-size:34px}
+.tt button{height:84px}
+.mm{display:grid;grid-template-columns:repeat(4,66px);gap:8px}
+.mm button{height:66px;font-size:30px;color:var(--mu)}
+.mm button.on{background:var(--acc);color:var(--dark);border-color:var(--acc)}
+.mm button.ok{background:rgba(45,212,191,.18);border-color:var(--acc);color:var(--tx)}
+canvas{width:100%;max-width:300px;border-radius:12px;border:1px solid var(--line);touch-action:none}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+function memory(el){
+  const E=['🍎','🚀','🎧','🐱','⚽','🌙'];
+  let k,buka,kunci,gerak,tm;
+  function reset(){k=[...E,...E].sort(()=>Math.random()-.5).map(e=>({e,s:0}));buka=[];kunci=false;gerak=0;draw()}
+  function draw(){
+    const ok=k.every(x=>x.s==2);
+    el.innerHTML=`<p class="info">Langkah <b>${gerak}</b></p>
+    <div class="mm">${k.map((x,i)=>`<button data-i="${i}" class="${x.s==1?'on':x.s==2?'ok':''}" aria-label="Kartu ${i+1}">${x.s?x.e:'?'}</button>`).join('')}</div>
+    <p class="info"><b>${ok?'Selesai dalam '+gerak+' langkah! 🎉':'Cari pasangan yang sama'}</b></p><button class="mini">${ok?'Main lagi':'Acak ulang'}</button>`;
+    el.querySelectorAll('.mm button').forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.i;if(kunci||k[i].s)return;k[i].s=1;buka.push(i);
+      if(buka.length==2){gerak++;const[a,c]=buka;
+        if(k[a].e==k[c].e){k[a].s=k[c].s=2;buka=[]}
+        else{kunci=true;tm=setTimeout(()=>{k[a].s=k[c].s=0;buka=[];kunci=false;draw()},700)}}
+      draw()});
+    el.querySelector('.mini').onclick=reset}
+  reset();
+  return()=>clearTimeout(tm);
+}
+
+memory(document.getElementById('app'));
+</script>
+</body>
+</html>
